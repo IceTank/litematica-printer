@@ -21,7 +21,7 @@ dependencies {
 //    implementation(project(":common"))
     minecraft("com.mojang:minecraft:${minecraft_version}")
     mappings("net.fabricmc:yarn:${yarn_mappings}:v2")
-
+    annotationProcessor("io.github.llamalad7:mixinextras-fabric:0.2.2")?.let { implementation(it)?.let { include(it) } }
     modImplementation("net.fabricmc:fabric-loader:${loader_version}")
     modImplementation("net.fabricmc.fabric-api:fabric-api:${fabric_version}")
     modImplementation("fi.dy.masa.malilib:malilib-fabric-${malilib_version}")
