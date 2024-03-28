@@ -9,6 +9,7 @@ pluginManagement {
     }
 }
 include 'v1_20'
+include 'v1_20_4'
 include 'v1_19_4'
 include 'v1_19_3'
 include 'v1_19'
