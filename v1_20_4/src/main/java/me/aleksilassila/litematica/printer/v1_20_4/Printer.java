@@ -24,7 +24,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -34,6 +35,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class Printer {
+    public static final Logger logger = LogManager.getLogger("litematica-printer");
     @NotNull
     public final ClientPlayerEntity player;
     MinecraftClient mc = MinecraftClient.getInstance();

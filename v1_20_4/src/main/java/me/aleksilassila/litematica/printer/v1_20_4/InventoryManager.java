@@ -6,33 +6,33 @@ import fi.dy.masa.litematica.world.WorldSchematic;
 import me.aleksilassila.litematica.printer.v1_20_4.config.PrinterConfig;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
-import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
-import net.minecraft.text.Text;
+import net.minecraft.screen.PlayerScreenHandler;
+import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
 
 public class InventoryManager {
     int delay = 0;
-    int serverResponseDelay = 0;
     /**
      * The queue of items to pull from the inventory
      */
-    private final ArrayDeque<Item> pullQueue = new ArrayDeque<>();
+    private final Deque<Item> pullDeque = new ArrayDeque<>();
     private final ArrayList<SlotInfo> hotbarSlots = new ArrayList<>(9);
 
     private final MinecraftClient mc = MinecraftClient.getInstance();
-    private final ArrayDeque<Integer> rollingSlots = new ArrayDeque<>();
+    private final Deque<Integer> rollingSlots = new ArrayDeque<>();
     private static InventoryManager instance;
     private InventoryManager() {
         // Probably add a way to configure this
@@ -52,38 +52,24 @@ public class InventoryManager {
     }
 
     public void reset() {
-        pullQueue.clear();
+        pullDeque.clear();
         hotbarSlots.forEach((info) -> info.ticksLocked = 0);
     }
 
     public boolean tick() {
-        if (mc.player == null) {
+        if (mc.player == null || mc.interactionManager == null) {
             return false;
-        }
-        PlayerInventory inventory = mc.player.getInventory();
-        for (int i = 0; i < hotbarSlots.size(); i++) {
-            SlotInfo info = hotbarSlots.get(i);
-            info.ticksLocked = Math.max(0, info.ticksLocked - 1);
-            if (info.ticksLocked == 0) {
-                if (info.waitingForItem != null && PrinterConfig.INVENTORY_NO_MULTI_ACTION.getBooleanValue()) {
-                    delay = PrinterConfig.INVENTORY_DELAY.getIntegerValue();
-                }
-                info.waitingForItem = null;
-            }
-            if (info.waitingForItem == inventory.getStack(i).getItem()) {
-                info.ticksLocked = Math.min(2, info.ticksLocked);
-            }
         }
 
         delay = Math.max(0, delay - 1);
 
-        if (!pullQueue.isEmpty() && delay == 0 && mc.player != null && mc.interactionManager != null && mc.getNetworkHandler() != null) {
-            if (PrinterConfig.INVENTORY_NO_MULTI_ACTION.getBooleanValue()) {
-                if (hotbarSlots.stream().anyMatch((info) -> info.ticksLocked > 0)) {
-                    return false;
-                }
-            }
-            Item item = pullQueue.poll();
+        if (!pullDeque.isEmpty() && delay == 0 && mc.getNetworkHandler() != null) {
+//            if (PrinterConfig.INVENTORY_NO_MULTI_ACTION.getBooleanValue()) {
+//                if (hotbarSlots.stream().anyMatch((info) -> info.ticksLocked > 0)) {
+//                    return false;
+//                }
+//            }
+            Item item = pullDeque.poll();
             if (getHotbarSlotWithItem(mc.player, new ItemStack(item)) != -1) {
                 return true;
             }
@@ -96,9 +82,10 @@ public class InventoryManager {
             hotbarSlots.get(nextSlot).waitingForItem = item;
             // int currentHotbarSlot = mc.player.getInventory().selectedSlot;
             mc.player.getInventory().selectedSlot = nextSlot;
-            mc.getNetworkHandler().sendPacket(new UpdateSelectedSlotC2SPacket(nextSlot));
-            if (PrinterConfig.PRINTER_DEBUG_LOG.getBooleanValue()) System.out.println("Picking item from inventory: " + slot + " -> " + nextSlot);
-            mc.interactionManager.pickFromInventory(slot);
+//            mc.getNetworkHandler().sendPacket(new UpdateSelectedSlotC2SPacket(nextSlot));
+            if (PrinterConfig.PRINTER_DEBUG_LOG.getBooleanValue()) System.out.println("Swapping item from inventory: " + slot + " into hotbar -> " + nextSlot);
+//            mc.interactionManager.pickFromInventory(slot);
+            swapAway(slot, nextSlot, mc.player.playerScreenHandler);
             delay += PrinterConfig.INVENTORY_DELAY.getIntegerValue();
             return true;
             // mc.player.getInventory().selectedSlot = currentHotbarSlot;
@@ -114,7 +101,7 @@ public class InventoryManager {
         BlockState state = world.getBlockState(pos);
         ItemStack stack = MaterialCache.getInstance().getRequiredBuildItemForState(state, world, pos);
         int slot = inv.getSlotWithStack(stack);
-        boolean shouldPick = slot > 9;
+        boolean shouldPick = slot > 8;
         if (slot != -1 && !shouldPick) {
             player.getInventory().selectedSlot = slot;
         } else if (slot != -1) {
@@ -122,7 +109,7 @@ public class InventoryManager {
         } else if (Configs.Generic.PICK_BLOCK_SHULKERS.getBooleanValue()) {
             slot = findSlotWithBoxWithItem(player.getInventory(), stack, true);
             if (slot > -1) {
-                if (slot > 9) {
+                if (slot > 8) {
                     mc.interactionManager.pickFromInventory(slot);
                 } else {
                     inv.selectedSlot = slot;
@@ -168,10 +155,10 @@ public class InventoryManager {
         if (stack.isEmpty()) {
             return false;
         }
-        if (!canRequest(stack)) {
+        if (pullDeque.contains(stack.getItem())) {
             return false;
         }
-        pullQueue.addLast(stack.getItem());
+        pullDeque.addLast(stack.getItem());
 
         return true;
     }
@@ -184,11 +171,11 @@ public class InventoryManager {
         if (itemStack != null) {
             PlayerInventory inventory = player.getInventory();
 
-            if (PrinterConfig.INVENTORY_PAUSE_PLACEMENT.getBooleanValue()) {
-                if (hotbarSlots.stream().anyMatch((slotInfo) -> slotInfo.waitingForItem != null)) {
-                    return false;
-                }
-            }
+//            if (PrinterConfig.INVENTORY_PAUSE_PLACEMENT.getBooleanValue()) {
+//                if (hotbarSlots.stream().anyMatch((slotInfo) -> slotInfo.waitingForItem != null)) {
+//                    return false;
+//                }
+//            }
 
             // This thing is straight from MinecraftClient#doItemPick()
             if (player.getAbilities().creativeMode) {
@@ -197,69 +184,25 @@ public class InventoryManager {
                 return true;
             } else {
                 int hotbarSlot = getHotbarSlotWithItem(player, itemStack);
-                if (hotbarSlot != -1 && InventoryManager.getInstance().isSlotFree(hotbarSlot)) {
-                    if (hotbarSlot < 0 || hotbarSlot > 8) {
-                        System.err.println("Inventory slot out of bounds: " + hotbarSlot);
-                        return false;
-                    }
-                    player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(hotbarSlot));
-                    inventory.selectedSlot = hotbarSlot;
-                    return true;
-                } else {
+                if (hotbarSlot == -1) {
                     requestStack(itemStack);
                     return false;
+                } else {
+                    player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(hotbarSlot));
+                    player.getInventory().selectedSlot = hotbarSlot;
+                    return true;
                 }
             }
         }
         return false;
     }
 
-    public boolean canRequest(ItemStack itemStack) {
-        Item item = itemStack.getItem();
-        if (hotbarSlots.stream().anyMatch((slotInfo) -> slotInfo.waitingForItem == item)) {
-            return false;
-        }
-        return !pullQueue.contains(item);
-    }
+    public boolean swapAway(int inventorySlot, int hotbarSlot, PlayerScreenHandler screenHandler) {
+        ClientPlayNetworkHandler networkHandler = mc.getNetworkHandler();
+        if (mc.player == null || mc.interactionManager == null || networkHandler == null) return false;
 
-    public boolean canSelect(ItemStack itemStack) {
-        if (mc.player == null) return false;
-        return getHotbarSlotWithItem(mc.player, itemStack) != -1;
-    }
-
-    public void onPacketReceived(Packet<?> packet, CallbackInfo callbackInfo) {
-        if (packet instanceof UpdateSelectedSlotC2SPacket packet1) {
-            if (LitematicaMixinMod.DEBUG) mc.inGameHud.getChatHud().addMessage(Text.literal("[Printer] Server selected slot: " + packet1.getSelectedSlot()));
-        } else if (packet instanceof ScreenHandlerSlotUpdateS2CPacket packet1) {
-            if (mc.player != null && packet1.getSyncId() == mc.player.currentScreenHandler.syncId) {
-                serverResponseDelay = 0;
-            }
-        }
-    }
-
-    /**
-     * Check slots 0-8 if they are free to use
-     * @param slot The slot to check
-     * @return If the slot is free
-     */
-    public boolean isSlotFree(int slot) {
-        return hotbarSlots.get(slot).isFree();
-    }
-
-    /**
-     * Returns a list of empty hotbar slots that are not locked. Range from 0-8
-     * @return A list of empty hotbar slots. Range from 0-8
-     */
-    private List<Integer> emptyValidHotbarSlots() {
-        if (mc.player == null) return new ArrayList<>();
-        List<Integer> slots = new ArrayList<>();
-        for (int i = 0; i < 9; i++) {
-            if (mc.player.getInventory().main.get(i).isEmpty()) {
-                if (!hotbarSlots.get(i).isFree()) continue;
-                slots.add(i);
-            }
-        }
-        return slots;
+        mc.interactionManager.clickSlot(screenHandler.syncId, inventorySlot, hotbarSlot, SlotActionType.SWAP, mc.player);
+        return true;
     }
 
     /**
@@ -268,21 +211,13 @@ public class InventoryManager {
      * @return The next available slot
      */
     private int nextHotbarSlot() {
-        List<Integer> emptyHotbarSlots = emptyValidHotbarSlots();
-        if (!emptyHotbarSlots.isEmpty()) {
-            int hotbarSlot = emptyHotbarSlots.get(0);
-            if (rollingSlots.contains(hotbarSlot)) {
-                rollingSlots.remove(hotbarSlot);
-                rollingSlots.addLast(hotbarSlot);
-            }
-            return hotbarSlot;
-        }
+        if (PrinterConfig.PRINTER_DEBUG_LOG.getBooleanValue()) System.out.println("Rolling slots: " + rollingSlots);
         if (!rollingSlots.isEmpty()) {
             int slot = rollingSlots.pollFirst();
             rollingSlots.addLast(slot);
             return slot;
         }
-        return 8;
+        return 3;
     }
 
     /**
@@ -317,17 +252,13 @@ public class InventoryManager {
 
         for (int i = 0; i < 9; ++i) {
             if (!inventory.main.get(i).isEmpty() && ItemStack.areItemsEqual(inventory.main.get(i), itemStack)) {
-                if (hotbarSlots.get(i).ticksLocked == 0) {
+//                if (hotbarSlots.get(i).ticksLocked == 0) {
                     return i;
-                }
+//                }
             }
         }
 
         return -1;
-    }
-
-    public static boolean isInventorySlotInHotbar(int slot) {
-        return slot >= 0 && slot <= 8;
     }
 
     static class SlotInfo {
