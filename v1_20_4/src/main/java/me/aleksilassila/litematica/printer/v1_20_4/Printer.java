@@ -1,24 +1,16 @@
 package me.aleksilassila.litematica.printer.v1_20_4;
 
 import fi.dy.masa.litematica.data.DataManager;
-import fi.dy.masa.litematica.materials.MaterialCache;
-import fi.dy.masa.litematica.util.InventoryUtils;
 import fi.dy.masa.litematica.util.RayTraceUtils;
 import fi.dy.masa.litematica.world.SchematicWorldHandler;
 import fi.dy.masa.litematica.world.WorldSchematic;
-import fi.dy.masa.malilib.util.InfoUtils;
 import me.aleksilassila.litematica.printer.v1_20_4.actions.Action;
-import me.aleksilassila.litematica.printer.v1_20_4.actions.PrepareAction;
 import me.aleksilassila.litematica.printer.v1_20_4.config.PrinterConfig;
 import me.aleksilassila.litematica.printer.v1_20_4.guides.Guide;
 import me.aleksilassila.litematica.printer.v1_20_4.guides.Guides;
-import me.aleksilassila.litematica.printer.v1_20_4.implementation.actions.InteractActionImpl;
-import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerAbilities;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -32,7 +24,6 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Stream;
 
 public class Printer {
     public static final Logger logger = LogManager.getLogger("litematica-printer");
@@ -108,6 +99,9 @@ public class Printer {
             return false;
 
         if (PrinterConfig.STOP_ON_MOVEMENT.getBooleanValue() && player.getVelocity().length() > 0.1) return false; // Stop if the player is moving
+        if (PrinterConfig.PRINTER_DISABLE_IN_GUIS.getBooleanValue()) {
+            if (mc.currentScreen != null) return false;
+        }
 
         List<BlockPos> positions = getReachablePositions();
         boolean didPlace = false;

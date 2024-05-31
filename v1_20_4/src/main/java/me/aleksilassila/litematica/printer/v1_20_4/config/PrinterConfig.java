@@ -10,6 +10,10 @@ import fi.dy.masa.malilib.config.options.ConfigHotkey;
 import fi.dy.masa.malilib.config.options.ConfigInteger;
 import fi.dy.masa.malilib.event.InputEventHandler;
 import fi.dy.masa.malilib.hotkeys.KeybindSettings;
+import me.aleksilassila.litematica.printer.v1_20_4.Printer;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.config.Configurator;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -43,6 +47,7 @@ public class PrinterConfig {
     public static final ConfigBoolean NO_PLACEMENT_CACHE = new ConfigBoolean("printerNoPlacementCache", false, "Disable the placement cache. This will make the printer slower but more accurate.");
     public static final ConfigBoolean RAYCAST_STRICT_BLOCK_HIT = new ConfigBoolean("printerRaycastStrictBlockHit", false, "Check if the right side of the block is hit.");
     public static final ConfigBoolean PREVENT_DOUBLE_TAP_SPRINTING = new ConfigBoolean("printerPreventDoubleTapSprinting", false, "Prevent double tap sprinting when the printer is active.");
+    public static final ConfigBoolean MOVE_WHILE_IN_INVENTORY = new ConfigBoolean("printerMoveWhileInInventory", false, "Allows the player to move while the player inventory is open.");
     public static final ConfigBoolean FREE_LOOK = new ConfigBoolean("printerFreeLook", false, "Free look mode. Allows you to look around while the printer is active.");
     public static final ConfigHotkey FREE_LOOK_TOGGLE = new ConfigHotkey("printerFreeLookToggle", "", KeybindSettings.MODIFIER_INGAME, "Free look mode. Allows you to look around while the printer is active.");
     public static final ConfigBoolean FREE_LOOK_THIRD_PERSON = new ConfigBoolean("printerFreeLookThirdPerson", true, "Free look mode. Allows you to look around while the printer is active.");
@@ -53,6 +58,7 @@ public class PrinterConfig {
     public static final ConfigBoolean PRINTER_DEBUG_LOG = new ConfigBoolean("printerDebugLog", false, "Print debug messages to the console.");
     public static final ConfigBoolean PRINTER_IGNORE_ROTATION = new ConfigBoolean("printerIgnoreRotation", false, "Ignore the block rotation when placing.");
     public static final ConfigBoolean PRINTER_ALLOW_NONE_EXACT_STATES = new ConfigBoolean("printerAllowNoneExactStates", false, "Allow none exact block states to be placed.\nThis includes things like lichen, muchroom stems, etc.");
+    public static final ConfigBoolean PRINTER_DISABLE_IN_GUIS = new ConfigBoolean("printerDisableInGuis", true, "Disable the printer in GUIs.");
     public ImmutableList<IConfigBase> getOptions() {
         List<IConfigBase> list = new java.util.ArrayList<>(Configs.Generic.OPTIONS);
         list.add(TICK_DELAY);
@@ -68,6 +74,7 @@ public class PrinterConfig {
         list.add(NO_PLACEMENT_CACHE);
         list.add(RAYCAST_STRICT_BLOCK_HIT);
         list.add(PREVENT_DOUBLE_TAP_SPRINTING);
+        list.add(MOVE_WHILE_IN_INVENTORY);
         list.add(FREE_LOOK);
         list.add(FREE_LOOK_TOGGLE);
         list.add(STRICT_BLOCK_FACE_CHECK);
@@ -78,6 +85,18 @@ public class PrinterConfig {
         list.add(PRINTER_DEBUG_LOG);
         list.add(PRINTER_IGNORE_ROTATION);
         list.add(PRINTER_ALLOW_NONE_EXACT_STATES);
+        list.add(PRINTER_DISABLE_IN_GUIS);
+
+        PRINTER_DEBUG_LOG.setValueChangeCallback(config -> {
+            if (config.getBooleanValue()) {
+                MaLiLib.logger.info("Printer debug logging enabled");
+                Configurator.setLevel(LogManager.getLogger(Printer.logger.getName()), Level.DEBUG);
+            } else {
+                MaLiLib.logger.info("Printer debug logging disabled");
+                Configurator.setLevel(LogManager.getLogger(Printer.logger.getName()), Level.INFO);
+            }
+        });
+
         return ImmutableList.copyOf(list);
     }
 
