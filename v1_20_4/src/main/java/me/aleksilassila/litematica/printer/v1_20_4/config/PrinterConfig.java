@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import fi.dy.masa.litematica.config.Configs;
 import fi.dy.masa.malilib.MaLiLib;
 import fi.dy.masa.malilib.config.IConfigBase;
-import fi.dy.masa.malilib.config.IConfigInteger;
 import fi.dy.masa.malilib.config.options.ConfigBoolean;
 import fi.dy.masa.malilib.config.options.ConfigDouble;
 import fi.dy.masa.malilib.config.options.ConfigHotkey;
@@ -63,7 +62,7 @@ public class PrinterConfig {
     public static final ConfigBoolean PRINTER_AIRPLACE = new ConfigBoolean("printerAirPlace", false, "Place blocks in the air.");
     public static final ConfigDouble PRINTER_AIRPLACE_RANGE = new ConfigDouble("printerAirPlaceRange", 5, 0, 10, "Range at which the printer can air place at");
     public static final ConfigBoolean PRINTER_AIRPLACE_FLOATING_ONLY = new ConfigBoolean("printerAirPlaceFloatingOnly", false, "Only attempt to air place if the block position is surrounded by air.");
-    public static final ConfigInteger MIN_INACTIVE_TIME_AIR_PLACE = new ConfigInteger("printerMinInactiveTimeAirPlace", 10, "Minimum time in ticks to wait before placing a block in the air.");
+    public static final ConfigInteger PRINTER_MIN_INACTIVE_TIME_AIR_PLACE = new ConfigInteger("printerMinInactiveTimeAirPlace", 5, "Minimum time in ticks to wait before placing a block in the air.");
     public ImmutableList<IConfigBase> getOptions() {
         List<IConfigBase> list = new java.util.ArrayList<>(Configs.Generic.OPTIONS);
         list.add(TICK_DELAY);
@@ -94,7 +93,7 @@ public class PrinterConfig {
         list.add(PRINTER_AIRPLACE);
         list.add(PRINTER_AIRPLACE_RANGE);
         list.add(PRINTER_AIRPLACE_FLOATING_ONLY);
-        list.add(MIN_INACTIVE_TIME_AIR_PLACE);
+        list.add(PRINTER_MIN_INACTIVE_TIME_AIR_PLACE);
 
         PRINTER_DEBUG_LOG.setValueChangeCallback(config -> {
             if (config.getBooleanValue()) {
