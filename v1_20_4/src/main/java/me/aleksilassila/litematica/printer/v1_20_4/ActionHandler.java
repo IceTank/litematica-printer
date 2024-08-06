@@ -2,6 +2,7 @@ package me.aleksilassila.litematica.printer.v1_20_4;
 
 import me.aleksilassila.litematica.printer.v1_20_4.actions.Action;
 import me.aleksilassila.litematica.printer.v1_20_4.actions.ActionChain;
+import me.aleksilassila.litematica.printer.v1_20_4.actions.InteractAction;
 import me.aleksilassila.litematica.printer.v1_20_4.actions.PrepareAction;
 import me.aleksilassila.litematica.printer.v1_20_4.config.PrinterConfig;
 import net.minecraft.client.MinecraftClient;
@@ -40,7 +41,26 @@ public class ActionHandler {
             if (nextAction != null) {
                 if (LitematicaMixinMod.DEBUG) System.out.println("Sending action " + nextAction);
                 // System.out.println("Sending action " + nextAction);
-                nextAction.send(client, player);
+                if (nextAction.send(client, player)) {
+                    if (PrinterConfig.PRINTER_DEBUG_LOG.getBooleanValue()) {
+                        System.out.println("Action " + nextAction + " was successful");
+                    }
+                    List<Action> runActions = nextAction instanceof ActionChain chain ? chain.getActions() : List.of(nextAction);
+                    for (Action action : runActions) {
+                        if (action instanceof InteractAction interactAction) {
+                            if (interactAction.context.isAirPlace) {
+                                Printer.addTimeout(interactAction.context.getBlockPos().offset(interactAction.context.getSide()));
+                            } else {
+                                Printer.addTimeout(interactAction.context.getBlockPos());
+                            }
+                            if (interactAction.context.isAirPlace) {
+                                System.out.println("InteractActionImpl.interact: attempting to air place block");
+                            } else {
+                                System.out.println("None airplace action finished");
+                            }
+                        }
+                    }
+                }
                 Printer.inactivityCounter = 0;
             } else {
                 lookAction = null;

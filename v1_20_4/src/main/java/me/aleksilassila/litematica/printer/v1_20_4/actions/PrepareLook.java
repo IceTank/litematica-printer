@@ -1,21 +1,13 @@
 package me.aleksilassila.litematica.printer.v1_20_4.actions;
 
-import me.aleksilassila.litematica.printer.v1_20_4.InventoryManager;
 import me.aleksilassila.litematica.printer.v1_20_4.LitematicaMixinMod;
-import me.aleksilassila.litematica.printer.v1_20_4.Printer;
 import me.aleksilassila.litematica.printer.v1_20_4.config.PrinterConfig;
 import me.aleksilassila.litematica.printer.v1_20_4.implementation.PrinterPlacementContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -90,13 +82,7 @@ public class PrepareLook extends Action {
     }
 
     @Override
-    public void send(MinecraftClient client, ClientPlayerEntity player) {
-        ItemStack itemStack = context.getStack();
-
-        if (!Printer.inventoryManager.select(itemStack)) {
-            return;
-        }
-
+    public boolean send(MinecraftClient client, ClientPlayerEntity player) {
         if (context.canStealth) {
             ArrayList<PlayerMoveC2SPacket.Full> packets = new ArrayList<>();
             float[] targetRot = getNeededRotations(player, context.getHitPos());
@@ -171,6 +157,7 @@ public class PrepareLook extends Action {
             this.pitch = Optional.of(pitch);
             player.networkHandler.sendPacket(packet);
         }
+        return true;
     }
 
     @Override

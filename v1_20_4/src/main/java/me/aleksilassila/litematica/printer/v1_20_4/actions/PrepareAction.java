@@ -111,110 +111,13 @@ public class PrepareAction extends Action {
     }
 
     @Override
-    public void send(MinecraftClient client, ClientPlayerEntity player) {
+    public boolean send(MinecraftClient client, ClientPlayerEntity player) {
         ItemStack itemStack = context.getStack();
-        int slot = context.requiredItemSlot;
 
-        if (itemStack != null) {
-            PlayerInventory inventory = player.getInventory();
-
-            // This thing is straight from MinecraftClient#doItemPick()
-            if (player.getAbilities().creativeMode) {
-                inventory.addPickBlock(itemStack);
-                client.interactionManager.clickCreativeStack(player.getStackInHand(Hand.MAIN_HAND), 36 + inventory.selectedSlot);
-            } else if (slot != -1) {
-                if (PlayerInventory.isValidHotbarIndex(slot)) {
-                    inventory.selectedSlot = slot;
-                } else {
-                    client.interactionManager.pickFromInventory(slot);
-                }
-            }
+        if (!Printer.inventoryManager.select(itemStack)) {
+            return false;
         }
-
-        if (context.canStealth) {
-            ArrayList<PlayerMoveC2SPacket.LookAndOnGround> packets = new ArrayList<>();
-            float[] targetRot = getNeededRotations(player, context.getHitPos());
-            float[] lastRot = new float[]{player.getYaw(), player.getPitch()};
-            double maxDeltaYaw = PrinterConfig.INTERPOLATE_LOOK_MAX_ANGLE.getDoubleValue();
-            double maxDeltaPitch = PrinterConfig.INTERPOLATE_LOOK_MAX_ANGLE.getDoubleValue();
-            boolean rotationDone = false;
-            int currentLoop = 0;
-
-            while (!rotationDone) {
-                if (currentLoop++ > 5) {
-                    System.out.println("To many loops " + currentLoop + " breaking");
-                    break;
-                }
-
-                float yawDelta = deltaYaw(lastRot[0], targetRot[0]);
-                float pitchDelta = targetRot[1] - lastRot[1];
-                if (PrinterConfig.INTERPOLATE_LOOK.getBooleanValue()) {
-                    rotationDone = true;
-                    if (PrinterConfig.PRINTER_DEBUG_LOG.getBooleanValue()) System.out.println("Yaw delta: " + yawDelta + ", pitch delta: " + pitchDelta);
-                    if (Math.abs(yawDelta) > maxDeltaYaw) {
-                        lastRot[0] += clamp(yawDelta, (float) -maxDeltaYaw, (float) maxDeltaYaw);
-                        rotationDone = false;
-                    } else {
-                        lastRot[0] = targetRot[0];
-                    }
-                    if (Math.abs(pitchDelta) > maxDeltaPitch) {
-                        lastRot[1] += clamp(pitchDelta, (float) -maxDeltaPitch, (float) maxDeltaPitch);
-                        rotationDone = false;
-                    } else {
-                        lastRot[1] = targetRot[1];
-                    }
-                } else {
-                    lastRot[0] = targetRot[0];
-                    lastRot[1] = targetRot[1];
-                    rotationDone = true;
-                }
-
-                if (PrinterConfig.PRINTER_DEBUG_LOG.getBooleanValue()) System.out.println("Sending yaw for stealth 1: " + lastRot[0] + ", pitch: " + lastRot[1]);
-                PlayerMoveC2SPacket.LookAndOnGround packet = new PlayerMoveC2SPacket.LookAndOnGround(lastRot[0], lastRot[1], player.isOnGround());
-                // PlayerMoveC2SPacket.Full packet = new PlayerMoveC2SPacket.Full(player.getX(), player.getY(), player.getZ(), lastRot[0], lastRot[1], player.isOnGround());
-
-                if (PrinterConfig.ROTATE_PLAYER.getBooleanValue()) {
-                    LitematicaMixinMod.printer.rotate(lastRot[0], lastRot[1]);
-                }
-                packets.add(packet);
-            }
-
-            for (PlayerMoveC2SPacket.LookAndOnGround packet : packets) {
-                if (Printer.lastRotation == null) {
-                    Printer.lastRotation = new Vec2f(player.getYaw(), player.getPitch());
-                }
-                this.yaw = packet.getYaw(player.getYaw());
-                this.pitch = packet.getPitch(player.getPitch());
-                player.networkHandler.sendPacket(packet);
-            }
-
-            PlayerMoveC2SPacket.LookAndOnGround lastPacket = packets.get(packets.size() - 1);
-            float randomnessDistance = 5f;
-            float yawRandomness = (float) (Math.random() * randomnessDistance * 2 - randomnessDistance);
-            float pitchRandomness = (float) (Math.random() * randomnessDistance * 2 - randomnessDistance);
-            float yaw = lastPacket.getYaw(player.getYaw()) + yawRandomness;
-            float pitch = lastPacket.getPitch(player.getPitch()) + pitchRandomness;
-
-            this.yaw = yaw;
-            this.pitch = pitch;
-            player.networkHandler.sendPacket(lastPacket);
-        } else if (modifyPitch || modifyYaw) {
-            float yaw = modifyYaw ? this.yaw : player.getYaw();
-            float pitch = modifyPitch ? this.pitch : player.getPitch();
-
-            if (PrinterConfig.PRINTER_DEBUG_LOG.getBooleanValue()) System.out.println("Sending yaw for modified yaw: " + yaw + ", pitch: " + pitch);
-            PlayerMoveC2SPacket.LookAndOnGround packet = new PlayerMoveC2SPacket.LookAndOnGround(yaw, pitch, player.isOnGround());
-
-            player.networkHandler.sendPacket(packet);
-        }
-
-        if (context.shouldSneak) {
-            player.input.sneaking = true;
-            player.networkHandler.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
-        } else {
-            player.input.sneaking = false;
-            player.networkHandler.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
-        }
+        return true;
     }
 
     @Override

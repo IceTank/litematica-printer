@@ -1,6 +1,7 @@
 package me.aleksilassila.litematica.printer.v1_20_4.guides.placement;
 
 import me.aleksilassila.litematica.printer.v1_20_4.LitematicaMixinMod;
+import me.aleksilassila.litematica.printer.v1_20_4.Printer;
 import me.aleksilassila.litematica.printer.v1_20_4.SchematicBlockState;
 import me.aleksilassila.litematica.printer.v1_20_4.config.PrinterConfig;
 import me.aleksilassila.litematica.printer.v1_20_4.implementation.PrinterPlacementContext;
@@ -288,6 +289,33 @@ public class GeneralPlacementGuide extends PlacementGuide {
                 }
             }
         // }
+        if(PrinterConfig.PRINTER_AIRPLACE.getBooleanValue()){
+            if (PrinterConfig.PRINTER_AIRPLACE_FLOATING_ONLY.getBooleanValue() && !isInAir(state.blockPos)) {
+                return null;
+            }
+            if (Printer.inactivityCounter < PrinterConfig.MIN_INACTIVE_TIME_AIR_PLACE.getIntegerValue()) {
+                return null;
+            }
+            if (PrinterConfig.PRINTER_AIRPLACE_RANGE.getDoubleValue() < 0 || player.getEyePos().distanceTo(Vec3d.ofCenter(state.blockPos)) > PrinterConfig.PRINTER_AIRPLACE_RANGE.getDoubleValue()) {
+                return null;
+            }
+            final Direction side = Direction.UP;
+            Vec3d hitVec = Vec3d.ofCenter(state.blockPos);
+            BlockPos neighborPos = state.blockPos.offset(side);
+            BlockHitResult hitResult = new BlockHitResult(hitVec, side.getOpposite(), neighborPos, false);
+            PrinterPlacementContext context = new PrinterPlacementContext(player, hitResult, requiredItem, slot, Direction.UP, false);
+            context.canStealth = true;
+            context.isAirPlace = true;
+            context.isRaytrace = false;
+            BlockState result = getRequiredItemAsBlock(player)
+                    .orElse(targetState.getBlock())
+                    .getPlacementState(context);
+
+            if (result != null && (statesEqual(result, targetState))) {
+                contextCache = context;
+                return context;
+            }
+        }
 
         return null;
     }

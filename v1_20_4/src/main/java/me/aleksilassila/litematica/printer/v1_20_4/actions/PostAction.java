@@ -1,6 +1,5 @@
 package me.aleksilassila.litematica.printer.v1_20_4.actions;
 
-import me.aleksilassila.litematica.printer.v1_20_4.LitematicaMixinMod;
 import me.aleksilassila.litematica.printer.v1_20_4.config.PrinterConfig;
 import me.aleksilassila.litematica.printer.v1_20_4.implementation.PrinterPlacementContext;
 import net.minecraft.client.MinecraftClient;
@@ -15,7 +14,7 @@ public class PostAction extends PrepareAction {
     }
 
     @Override
-    public void send(MinecraftClient client, ClientPlayerEntity player) {
+    public boolean send(MinecraftClient client, ClientPlayerEntity player) {
         if (context.canStealth) {
             PlayerMoveC2SPacket.LookAndOnGround packet = new PlayerMoveC2SPacket.LookAndOnGround(this.yaw, this.pitch, player.isOnGround());
 
@@ -26,5 +25,6 @@ public class PostAction extends PrepareAction {
 
             player.networkHandler.sendPacket(packet);
         }
+        return true;
     }
 }

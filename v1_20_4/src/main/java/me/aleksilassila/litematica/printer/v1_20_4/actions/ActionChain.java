@@ -1,5 +1,6 @@
 package me.aleksilassila.litematica.printer.v1_20_4.actions;
 
+import me.aleksilassila.litematica.printer.v1_20_4.config.PrinterConfig;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 
@@ -10,10 +11,16 @@ public class ActionChain extends Action {
     List<Action> actions = new ArrayList<>();
 
     @Override
-    public void send(MinecraftClient client, ClientPlayerEntity player) {
+    public boolean send(MinecraftClient client, ClientPlayerEntity player) {
         for (Action action : actions) {
-            action.send(client, player);
+            if (!action.send(client, player)) {
+                if (PrinterConfig.PRINTER_DEBUG_LOG.getBooleanValue()) {
+                    System.out.println("ActionChain.send: Chain failed at " + action);
+                }
+                return false;
+            }
         }
+        return true;
     }
 
     public void addAction(Action action) {

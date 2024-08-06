@@ -18,11 +18,12 @@ abstract public class InteractAction extends Action {
     protected abstract ActionResult interact(MinecraftClient client, ClientPlayerEntity player, Hand hand, BlockHitResult hitResult);
 
     @Override
-    public void send(MinecraftClient client, ClientPlayerEntity player) {
+    public boolean send(MinecraftClient client, ClientPlayerEntity player) {
         interact(client, player, Hand.MAIN_HAND, context.hitResult);
 
         if (LitematicaMixinMod.DEBUG)
             System.out.println("InteractAction.send: Blockpos: " + context.getBlockPos() + " Side: " + context.getSide() + " HitPos: " + context.getHitPos());
+        return true;
     }
 
     @Override

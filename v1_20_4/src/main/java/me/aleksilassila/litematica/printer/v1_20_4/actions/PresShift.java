@@ -6,8 +6,9 @@ import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 
 public class PresShift extends Action {
     @Override
-    public void send(MinecraftClient client, ClientPlayerEntity player) {
+    public boolean send(MinecraftClient client, ClientPlayerEntity player) {
         player.input.sneaking = true;
         player.networkHandler.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
+        return true;
     }
 }
