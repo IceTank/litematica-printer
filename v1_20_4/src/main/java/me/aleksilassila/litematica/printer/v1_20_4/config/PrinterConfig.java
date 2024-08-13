@@ -4,10 +4,8 @@ import com.google.common.collect.ImmutableList;
 import fi.dy.masa.litematica.config.Configs;
 import fi.dy.masa.malilib.MaLiLib;
 import fi.dy.masa.malilib.config.IConfigBase;
-import fi.dy.masa.malilib.config.options.ConfigBoolean;
-import fi.dy.masa.malilib.config.options.ConfigDouble;
-import fi.dy.masa.malilib.config.options.ConfigHotkey;
-import fi.dy.masa.malilib.config.options.ConfigInteger;
+import fi.dy.masa.malilib.config.IConfigOptionListEntry;
+import fi.dy.masa.malilib.config.options.*;
 import fi.dy.masa.malilib.event.InputEventHandler;
 import fi.dy.masa.malilib.hotkeys.KeybindSettings;
 import me.aleksilassila.litematica.printer.v1_20_4.Printer;
@@ -41,8 +39,8 @@ public class PrinterConfig {
     public static final ConfigInteger INACTIVE_SNAP_BACK = new ConfigInteger("printerInactiveSnapBack", 10, "Snap back to the view direction after placing a block.");
     public static final ConfigInteger INVENTORY_DELAY = new ConfigInteger("printerInventoryDelay", 10, 0, 100, "The delay between each inventory action. 0 = no delay.");
     public static final ConfigBoolean INVENTORY_NO_MULTI_ACTION = new ConfigBoolean("printerInventoryNoMultiAction", true, "Only allow one inventory action at a time.");
-    public static final ConfigBoolean INVENTORY_PAUSE_PLACEMENT = new ConfigBoolean("printerInventoryPausePlacement", true, "Pause the printing process when the inventory is waiting on an action to finish.");
     public static final ConfigInteger INVENTORY_AFTER_EQUIP_USE_DELAY = new ConfigInteger("printerInventoryAfterEquipUseDelay", 10, 0, 100, "Delay on an item usage after it landed in the hotbar slot.");
+    public static final ConfigOptionList PRINTER_INVENTORY_MANAGEMENT_MODE = new ConfigOptionList("printerInventoryManagementMode", InventoryManagementModeEnum.LEAST_USED, "Inventory management mode. Rolling = cycle through the hotbar, Least Used = use the least used slot in the hotbar.");
     public static final ConfigBoolean RAYCAST = new ConfigBoolean("printerRaycast", false, "Raycast the block to place to check if it is visible.");
     public static final ConfigBoolean NO_PLACEMENT_CACHE = new ConfigBoolean("printerNoPlacementCache", false, "Disable the placement cache. This will make the printer slower but more accurate.");
     public static final ConfigBoolean RAYCAST_STRICT_BLOCK_HIT = new ConfigBoolean("printerRaycastStrictBlockHit", false, "Check if the right side of the block is hit.");
@@ -72,8 +70,8 @@ public class PrinterConfig {
         list.add(CARPET_MODE);
         list.add(INVENTORY_DELAY);
         list.add(INVENTORY_NO_MULTI_ACTION);
-        list.add(INVENTORY_PAUSE_PLACEMENT);
         list.add(INVENTORY_AFTER_EQUIP_USE_DELAY);
+        list.add(PRINTER_INVENTORY_MANAGEMENT_MODE);
         list.add(RAYCAST);
         list.add(NO_PLACEMENT_CACHE);
         list.add(RAYCAST_STRICT_BLOCK_HIT);
@@ -113,5 +111,54 @@ public class PrinterConfig {
         FREE_LOOK_TOGGLE.getKeybind().setCallback(new FreeLookKeyCallbackToggle(FREE_LOOK));
         PRINTER_PICK_BLOCK.getKeybind().setCallback(new PrinterPickBlockKeyCallback());
         InputEventHandler.getKeybindManager().registerKeybindProvider(PrinterInputHandler.getInstance());
+    }
+
+    public enum InventoryManagementModeEnum implements IConfigOptionListEntry {
+        ROLLING("rolling", "Rolling"),
+        LEAST_USED("leastUsed", "Least Used");
+
+        final String name;
+        final String displayName;
+        InventoryManagementModeEnum(String name, String displayName) {
+            this.name = name;
+            this.displayName = displayName;
+        }
+
+        public boolean is(InventoryManagementModeEnum mode) {
+            return this.ordinal() == mode.ordinal();
+        }
+
+        public boolean is(String string) {
+            return this.name.equalsIgnoreCase(string);
+        }
+
+        @Override
+        public String getStringValue() {
+            return name;
+        }
+
+        @Override
+        public String getDisplayName() {
+            return displayName;
+        }
+
+        @Override
+        public IConfigOptionListEntry cycle(boolean forward) {
+            int current = this.ordinal();
+            int next = forward ? current + 1 : current - 1;
+            if (next < 0) next = InventoryManagementModeEnum.values().length - 1;
+            if (next >= InventoryManagementModeEnum.values().length) next = 0;
+            return InventoryManagementModeEnum.values()[next];
+        }
+
+        @Override
+        public IConfigOptionListEntry fromString(String value) {
+            for (InventoryManagementModeEnum mode : InventoryManagementModeEnum.values()) {
+                if (mode.name.equalsIgnoreCase(value)) {
+                    return mode;
+                }
+            }
+            return this;
+        }
     }
 }

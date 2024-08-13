@@ -53,10 +53,12 @@ public class ActionHandler {
                             } else {
                                 Printer.addTimeout(interactAction.context.getBlockPos());
                             }
-                            if (interactAction.context.isAirPlace) {
-                                System.out.println("InteractActionImpl.interact: attempting to air place block");
-                            } else {
-                                System.out.println("None airplace action finished");
+                            if (PrinterConfig.PRINTER_DEBUG_LOG.getBooleanValue()) {
+                                if (interactAction.context.isAirPlace) {
+                                    System.out.println("InteractActionImpl.interact: attempting to air place block");
+                                } else {
+                                    System.out.println("None airplace action finished");
+                                }
                             }
                         }
                     }

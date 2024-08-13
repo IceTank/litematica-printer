@@ -28,16 +28,17 @@ public class InventoryManager {
     /**
      * The queue of items to pull from the inventory
      */
-    private final Deque<Item> pullDeque = new ArrayDeque<>();
     private final ArrayList<SlotInfo> hotbarSlots = new ArrayList<>(9);
 
     private final MinecraftClient mc = MinecraftClient.getInstance();
     private final Deque<Integer> rollingSlots = new ArrayDeque<>();
+    private final Deque<Integer> lastUsedSlots = new ArrayDeque<>();
     private static InventoryManager instance;
     private InventoryManager() {
         // Probably add a way to configure this
         for (int i = 3; i < 9; i++) {
             rollingSlots.add(i);
+            lastUsedSlots.add(i);
         }
         for (int i = 0; i < 9; i++) {
             hotbarSlots.add(new SlotInfo());
@@ -52,7 +53,6 @@ public class InventoryManager {
     }
 
     public void reset() {
-        pullDeque.clear();
         hotbarSlots.forEach((info) -> info.ticksLocked = 0);
     }
 
@@ -63,34 +63,32 @@ public class InventoryManager {
 
         delay = Math.max(0, delay - 1);
 
-        if (!pullDeque.isEmpty() && delay == 0 && mc.getNetworkHandler() != null) {
-//            if (PrinterConfig.INVENTORY_NO_MULTI_ACTION.getBooleanValue()) {
-//                if (hotbarSlots.stream().anyMatch((info) -> info.ticksLocked > 0)) {
-//                    return false;
-//                }
-//            }
-            Item item = pullDeque.poll();
-            if (getHotbarSlotWithItem(mc.player, new ItemStack(item)) != -1) {
-                return true;
-            }
-            int slot = getBestInventorySlotWithItem(mc.player, new ItemStack(item));
-            if (slot == -1) {
-                return false;
-            }
-            int nextSlot = nextHotbarSlot();
-            hotbarSlots.get(nextSlot).addTicksLocked(10);
-            hotbarSlots.get(nextSlot).waitingForItem = item;
-            // int currentHotbarSlot = mc.player.getInventory().selectedSlot;
-            mc.player.getInventory().selectedSlot = nextSlot;
-//            mc.getNetworkHandler().sendPacket(new UpdateSelectedSlotC2SPacket(nextSlot));
-            if (PrinterConfig.PRINTER_DEBUG_LOG.getBooleanValue()) System.out.println("Swapping item from inventory: " + slot + " into hotbar -> " + nextSlot);
-//            mc.interactionManager.pickFromInventory(slot);
-            swapAway(slot, nextSlot, mc.player.playerScreenHandler);
-            delay += PrinterConfig.INVENTORY_DELAY.getIntegerValue();
-            return true;
-            // mc.player.getInventory().selectedSlot = currentHotbarSlot;
-        }
         return false;
+    }
+
+    /**
+     * Swaps the item from the inventory to the hotbar
+     * @param item The item to pull from the inventory
+     * @return True if the item could the swapped into the hotbar
+     */
+    private boolean swapToHotbar(ClientPlayerEntity player, Item item) {
+        if (getHotbarSlotWithItem(player, new ItemStack(item)) != -1) {
+            return true;
+        }
+        int slot = getBestInventorySlotWithItem(player, new ItemStack(item));
+        if (slot == -1) {
+            return false;
+        }
+        int nextSlot = nextHotbarSlot();
+        hotbarSlots.get(nextSlot).addTicksLocked(10);
+        hotbarSlots.get(nextSlot).waitingForItem = item;
+        player.getInventory().selectedSlot = nextSlot;
+        if (PrinterConfig.PRINTER_DEBUG_LOG.getBooleanValue()) {
+            System.out.println("Swapping item from inventory: " + slot + " into hotbar -> " + nextSlot);
+        }
+        swapAway(slot, nextSlot, player.playerScreenHandler);
+        delay += PrinterConfig.INVENTORY_DELAY.getIntegerValue();
+        return true;
     }
 
     public void pickSlot(WorldSchematic world, ClientPlayerEntity player, BlockPos pos) {
@@ -151,18 +149,6 @@ public class InventoryManager {
         return count;
     }
 
-    private boolean requestStack(ItemStack stack) {
-        if (stack.isEmpty()) {
-            return false;
-        }
-        if (pullDeque.contains(stack.getItem())) {
-            return false;
-        }
-        pullDeque.addLast(stack.getItem());
-
-        return true;
-    }
-
     public boolean select(ItemStack itemStack) {
         ClientPlayerEntity player = mc.player;
         if (player == null || mc.interactionManager == null) {
@@ -171,25 +157,34 @@ public class InventoryManager {
         if (itemStack != null) {
             PlayerInventory inventory = player.getInventory();
 
-//            if (PrinterConfig.INVENTORY_PAUSE_PLACEMENT.getBooleanValue()) {
-//                if (hotbarSlots.stream().anyMatch((slotInfo) -> slotInfo.waitingForItem != null)) {
-//                    return false;
-//                }
-//            }
-
             // This thing is straight from MinecraftClient#doItemPick()
             if (player.getAbilities().creativeMode) {
                 inventory.addPickBlock(itemStack);
                 mc.interactionManager.clickCreativeStack(player.getStackInHand(Hand.MAIN_HAND), 36 + inventory.selectedSlot);
+                updateLastUsedSlot(inventory.selectedSlot);
                 return true;
             } else {
                 int hotbarSlot = getHotbarSlotWithItem(player, itemStack);
                 if (hotbarSlot == -1) {
-                    requestStack(itemStack);
+                    if (delay > 0) {
+                        return false;
+                    }
+                    if (swapToHotbar(mc.player, itemStack.getItem())) {
+                        // If true the item should now be somewhere in the hotbar
+                        hotbarSlot = getHotbarSlotWithItem(player, itemStack);
+                        if (hotbarSlot != -1) {
+                            return false;
+                        }
+                        player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(hotbarSlot));
+                        player.getInventory().selectedSlot = hotbarSlot;
+                        updateLastUsedSlot(hotbarSlot);
+                        return true;
+                    }
                     return false;
                 } else {
                     player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(hotbarSlot));
                     player.getInventory().selectedSlot = hotbarSlot;
+                    updateLastUsedSlot(hotbarSlot);
                     return true;
                 }
             }
@@ -211,11 +206,29 @@ public class InventoryManager {
      * @return The next available slot
      */
     private int nextHotbarSlot() {
-        if (PrinterConfig.PRINTER_DEBUG_LOG.getBooleanValue()) System.out.println("Rolling slots: " + rollingSlots);
-        if (!rollingSlots.isEmpty()) {
-            int slot = rollingSlots.pollFirst();
-            rollingSlots.addLast(slot);
-            return slot;
+        final String mode = PrinterConfig.PRINTER_INVENTORY_MANAGEMENT_MODE.getStringValue();
+
+        if (PrinterConfig.InventoryManagementModeEnum.LEAST_USED.is(mode)) {
+            if (!lastUsedSlots.isEmpty()) {
+                int last = lastUsedSlots.pollLast();
+                lastUsedSlots.addFirst(last);
+                if (PrinterConfig.PRINTER_DEBUG_LOG.getBooleanValue()) {
+                    System.out.println("Next new least used slot: " + last + "Last used slots: " + lastUsedSlots);
+                }
+                return last;
+            }
+        } else if (PrinterConfig.InventoryManagementModeEnum.ROLLING.is(mode)) {
+            if (!rollingSlots.isEmpty()) {
+                int slot = rollingSlots.pollFirst();
+                rollingSlots.addLast(slot);
+                if (PrinterConfig.PRINTER_DEBUG_LOG.getBooleanValue()) {
+                    System.out.println("Next new rolling slot: " + slot + "Rolling slots: " + rollingSlots);
+                }
+                return slot;
+            }
+        }
+        if (PrinterConfig.PRINTER_DEBUG_LOG.getBooleanValue()) {
+            System.out.println("No slots available");
         }
         return 3;
     }
@@ -259,6 +272,15 @@ public class InventoryManager {
         }
 
         return -1;
+    }
+
+    private void updateLastUsedSlot(int slot) {
+        lastUsedSlots.remove(slot);
+        lastUsedSlots.addFirst(slot);
+        if (PrinterConfig.PRINTER_DEBUG_LOG.getBooleanValue()) {
+            String list = lastUsedSlots.stream().map(String::valueOf).reduce((a, b) -> a + ", " + b).orElse("");
+            System.out.println("Updating last used slot: " + slot + ". Now: " + list);
+        }
     }
 
     static class SlotInfo {
