@@ -5,12 +5,23 @@
 ![GitHub all releases](https://img.shields.io/github/downloads/aleksilassila/litematica-printer/total)
 ![GitHub Repo stars](https://img.shields.io/github/stars/aleksilassila/litematica-printer)
 
-This extension adds printing functionality for [Litematica fabric](https://github.com/maruohon/litematica) 1.19, 1.18
-and
-1.17 versions. Printer allows players to build
+This extension adds printing functionality for [Litematica fabric](https://github.com/maruohon/litematica) 1.21, 1.20.4, 1.20.0 ,1.19, 1.18 and 1.17 versions. Printer allows players to build
 big structures more quickly by automatically placing the correct blocks around you.
 
 ![Demo](printer_demo.gif)
+
+## Warning Minecraft Version 1.21
+Since there is no official release of Litematica for 1.21, the printer uses a update fork of it and MaliLib. <br>
+This fork is not official and may contain bugs or issues. If you encounter any issues with the printer, please report them to the fork's repository.<br>
+This fork is not guaranteed secure as it isn't an official release.<br>
+1.21 Litematica repository: [Litematica](https://github.com/sakura-ryoko/litematica)<br>
+1.21 MaliLib repository: [MaliLib](https://github.com/sakura-ryoko/malilib)<br>
+USE AT YOUR OWN RISK
+
+## Download
+
+Check the GitHub release page for the latest version of the printer for your Minecraft version:
+[Releases](https://github.com/IceTank/litematica-printer/releases)
 
 ## Installation
 
@@ -46,10 +57,10 @@ The FreeLook is programmed to attempt to move you in the direction you are looki
 ## Issues
 
 If you have issues with the printer, **do not** bother the original creator of
-Litematica (maruohon) with them. Contact me instead. Feature requests or bugs can
-be reported via [GitHub issues](https://github.com/aleksilassila/litematica-printer/issues),
-or in [Discord](https://discord.gg/enypPQh6pz). I'll try to keep a todo list of things
-I'm planning to implement and fix, so please look for duplicates there first.
+Litematica (maruohon) or the original creator of litematica-printer (aleksilassila)
+with them. Contact me instead. Feature requests or bugs for this Fork can
+be reported via [GitHub issues](https://github.com/icetank/litematica-printer/issues),
+or via Discord (@IceTank).
 
 Before creating an issue, make sure you are using the latest version of the mod.
 To make fixing bugs easier, include the following information in your issue:
@@ -65,10 +76,8 @@ To make fixing bugs easier, include the following information in your issue:
 Currently, the following features are still broken or missing:
 
 - Placing liquids (printing **in** liquids works though)
-- Printing without support directly in air (printInAir)
 - Current algorithm for placing rails isn't perfect,
   sometimes it can't place all the rails (to avoid placing anything incorrectly).
-- Legit mode? (for anticheats)
 
 Also, I have decided that features that fix existing builds,
 such as automatic excavation or correcting incorrectly placed blocks are out of the scope of this mod.
