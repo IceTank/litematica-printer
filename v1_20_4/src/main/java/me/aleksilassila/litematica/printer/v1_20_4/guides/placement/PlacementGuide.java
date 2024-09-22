@@ -1,12 +1,12 @@
 package me.aleksilassila.litematica.printer.v1_20_4.guides.placement;
 
 import me.aleksilassila.litematica.printer.v1_20_4.LitematicaMixinMod;
-import me.aleksilassila.litematica.printer.v1_20_4.Printer;
+import me.aleksilassila.litematica.printer.v1_20_4.SchematicBlockState;
 import me.aleksilassila.litematica.printer.v1_20_4.actions.*;
 import me.aleksilassila.litematica.printer.v1_20_4.config.PrinterConfig;
-import me.aleksilassila.litematica.printer.v1_20_4.implementation.PrinterPlacementContext;
-import me.aleksilassila.litematica.printer.v1_20_4.SchematicBlockState;
 import me.aleksilassila.litematica.printer.v1_20_4.guides.Guide;
+import me.aleksilassila.litematica.printer.v1_20_4.implementation.PrinterPlacementContext;
+import me.aleksilassila.litematica.printer.v1_20_4.implementation.actions.AirPlaceAction;
 import me.aleksilassila.litematica.printer.v1_20_4.implementation.actions.InteractActionImpl;
 import net.minecraft.block.*;
 import net.minecraft.client.MinecraftClient;
@@ -111,9 +111,13 @@ abstract public class PlacementGuide extends Guide {
 
         if (ctx.isAirPlace) {
             actionChain.addAction(new PrepareAction(ctx));
-            actionChain.addAction(new InteractActionImpl(ctx));
+            actionChain.addAction(new AirPlaceAction(ctx));
             actions.add(actionChain);
             return actions;
+        } else {
+            if (PrinterConfig.PRINTER_AIRPLACE.getBooleanValue() && PrinterConfig.PRINTER_AIRPLACE_ONLY.getBooleanValue()) {
+                return actions;
+            }
         }
 
         actionChain.addAction(new PrepareLook(ctx));

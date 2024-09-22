@@ -104,8 +104,6 @@ public class Printer {
         }
 
         List<BlockPos> positions = getReachablePositions();
-        boolean didPlace = false;
-        boolean acceptsMoreActions = false;
 
         if (PrinterConfig.BLOCK_TIMEOUT.getIntegerValue() != 0) {
             positions = positions.stream().filter((pos) -> blockPosTimeout.stream().noneMatch((entry) -> entry.pos.equals(pos))).toList(); // From block timeout. Don't place already placed blocks.
@@ -118,20 +116,10 @@ public class Printer {
 
             Guide[] guides = interactionGuides.getInteractionGuides(state);
 
-            BlockHitResult result = RayTraceUtils.traceToSchematicWorld(player, 10, true, true);
-            boolean isCurrentlyLookingSchematic = result != null && result.getBlockPos().equals(position);
-
             for (Guide guide : guides) {
                 if (guide.canExecute(player)) {
-                    // System.out.println("Executing Guide:" + guide);
                     List<Action> actions = guide.execute(player);
                     actionHandler.addActions(actions.toArray(Action[]::new));
-//                    actions.forEach((action) -> {
-//                        if (action instanceof InteractActionImpl a1) {
-//                            // InfoUtils.sendVanillaMessage(Text.literal("InteractActionImpl: " + a1));
-//                            mc.inGameHud.getChatHud().addMessage(Text.literal("InteractActionImpl: " + a1.context.getBlockPos()));
-//                        }
-//                    });
                     return true;
                 }
                 if (guide.skipOtherGuides()) continue findBlock;

@@ -58,6 +58,8 @@ public class PrinterConfig {
     public static final ConfigBoolean PRINTER_ALLOW_NONE_EXACT_STATES = new ConfigBoolean("printerAllowNoneExactStates", false, "Allow none exact block states to be placed.\nThis includes things like lichen, muchroom stems, etc.");
     public static final ConfigBoolean PRINTER_DISABLE_IN_GUIS = new ConfigBoolean("printerDisableInGuis", true, "Disable the printer in GUIs.");
     public static final ConfigBoolean PRINTER_AIRPLACE = new ConfigBoolean("printerAirPlace", false, "Place blocks in the air.");
+    public static final ConfigBoolean PRINTER_AIRPLACE_ONLY = new ConfigBoolean("printerAirPlaceOnly", false, "Attempt to air place only when air place is enabled.");
+    public static final ConfigBoolean PRINTER_AIRPLACE_OFFHAND_SLOT_SUPPRESS = new ConfigBoolean("printerAirPlaceOffhandSlotSuppress", true, "Suppress off-hand slot updates when air placing. Turn off when there are de-sync issues in the off-hand slot.");
     public static final ConfigDouble PRINTER_AIRPLACE_RANGE = new ConfigDouble("printerAirPlaceRange", 5, 0, 10, "Range at which the printer can air place at");
     public static final ConfigBoolean PRINTER_AIRPLACE_FLOATING_ONLY = new ConfigBoolean("printerAirPlaceFloatingOnly", false, "Only attempt to air place if the block position is surrounded by air.");
     public static final ConfigInteger PRINTER_MIN_INACTIVE_TIME_AIR_PLACE = new ConfigInteger("printerMinInactiveTimeAirPlace", 5, "Minimum time in ticks to wait before placing a block in the air.");
@@ -89,6 +91,8 @@ public class PrinterConfig {
         list.add(PRINTER_ALLOW_NONE_EXACT_STATES);
         list.add(PRINTER_DISABLE_IN_GUIS);
         list.add(PRINTER_AIRPLACE);
+        list.add(PRINTER_AIRPLACE_ONLY);
+        list.add(PRINTER_AIRPLACE_OFFHAND_SLOT_SUPPRESS);
         list.add(PRINTER_AIRPLACE_RANGE);
         list.add(PRINTER_AIRPLACE_FLOATING_ONLY);
         list.add(PRINTER_MIN_INACTIVE_TIME_AIR_PLACE);
