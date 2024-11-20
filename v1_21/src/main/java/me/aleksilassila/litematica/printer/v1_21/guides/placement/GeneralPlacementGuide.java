@@ -273,18 +273,18 @@ public class GeneralPlacementGuide extends PlacementGuide {
                             }
                         }
                         continue;
-                    }
+                    } else {
+                        BlockHitResult hitResult = new BlockHitResult(blockHit, side.getOpposite(), neighborPos, false);
+                        PrinterPlacementContext context = new PrinterPlacementContext(player, hitResult, requiredItem, slot, relativeDirection, requiresShift);
+                        context.canStealth = true;
+                        BlockState result = getRequiredItemAsBlock(player)
+                                .orElse(targetState.getBlock())
+                                .getPlacementState(context); // FIXME torch shift clicks another torch and getPlacementState is the clicked block, which is true
 
-                    BlockHitResult hitResult = new BlockHitResult(blockHit, side.getOpposite(), neighborPos, false);
-                    PrinterPlacementContext context = new PrinterPlacementContext(player, hitResult, requiredItem, slot, relativeDirection, requiresShift);
-                    context.canStealth = true;
-                    BlockState result = getRequiredItemAsBlock(player)
-                            .orElse(targetState.getBlock())
-                            .getPlacementState(context); // FIXME torch shift clicks another torch and getPlacementState is the clicked block, which is true
-
-                    if (result != null && (statesEqual(result, targetState) || correctChestPlacement(targetState, result))) {
-                        contextCache = context;
-                        return context;
+                        if (result != null && (statesEqual(result, targetState) || correctChestPlacement(targetState, result))) {
+                            contextCache = context;
+                            return context;
+                        }
                     }
                 }
             }
