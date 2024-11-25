@@ -3,7 +3,6 @@ package me.aleksilassila.litematica.printer.v1_21.guides.placement;
 import me.aleksilassila.litematica.printer.v1_21.SchematicBlockState;
 import net.minecraft.block.*;
 import net.minecraft.block.enums.BlockHalf;
-import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
@@ -26,7 +25,7 @@ public class FacingBlockGuide extends SlabGuide {
             return side.map(Collections::singletonList).orElseGet(Collections::emptyList);
         }
         if (block instanceof StairsBlock) {
-            Direction half = getRequiredHalf(state);
+            Direction half = getRequiredHalf(state).getOpposite();
             return Arrays.stream(Direction.values()).filter(d -> d != half).toList();
         }
 
@@ -55,7 +54,7 @@ public class FacingBlockGuide extends SlabGuide {
         BlockState currentState = state.currentState;
 
         if (!currentState.contains(StairsBlock.HALF)) {
-            return targetState.get(StairsBlock.HALF) == BlockHalf.TOP ? Direction.DOWN : Direction.UP;
+            return targetState.get(StairsBlock.HALF) == BlockHalf.TOP ? Direction.UP : Direction.DOWN;
         } else if (currentState.get(StairsBlock.HALF) != targetState.get(StairsBlock.HALF)) {
             return currentState.get(StairsBlock.HALF) == BlockHalf.TOP ? Direction.DOWN : Direction.UP;
         } else {

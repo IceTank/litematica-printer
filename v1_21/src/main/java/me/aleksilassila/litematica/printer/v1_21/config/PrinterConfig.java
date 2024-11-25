@@ -17,7 +17,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public class PrinterConfig {
-    private PrinterConfig() {}
+    private PrinterConfig() {
+    }
+
     @Nullable
     public static PrinterConfig INSTANCE;
 
@@ -27,6 +29,7 @@ public class PrinterConfig {
         }
         return INSTANCE;
     }
+
     public static final ConfigInteger TICK_DELAY = new ConfigInteger("printerTickDelay", 0, 0, 100, "Tick delay between actions. 0 = no delay.");
     public static final ConfigInteger BLOCK_TIMEOUT = new ConfigInteger("printerBlockTimeout", 10, 0, 100, "How many ticks to wait before trying to place the same block again.");
     public static final ConfigBoolean ROTATE_PLAYER = new ConfigBoolean("printerRotatePlayer", true, "Rotate the player to face the block to place.");
@@ -63,6 +66,7 @@ public class PrinterConfig {
     public static final ConfigDouble PRINTER_AIRPLACE_RANGE = new ConfigDouble("printerAirPlaceRange", 5, 0, 10, "Range at which the printer can air place at");
     public static final ConfigBoolean PRINTER_AIRPLACE_FLOATING_ONLY = new ConfigBoolean("printerAirPlaceFloatingOnly", false, "Only attempt to air place if the block position is surrounded by air.");
     public static final ConfigInteger PRINTER_MIN_INACTIVE_TIME_AIR_PLACE = new ConfigInteger("printerMinInactiveTimeAirPlace", 5, "Minimum time in ticks to wait before placing a block in the air.");
+
     public ImmutableList<IConfigBase> getOptions() {
         List<IConfigBase> list = new java.util.ArrayList<>(Configs.Generic.OPTIONS);
         list.add(TICK_DELAY);
@@ -110,6 +114,10 @@ public class PrinterConfig {
         return ImmutableList.copyOf(list);
     }
 
+    public static boolean isDebug() {
+        return PRINTER_DEBUG_LOG.getBooleanValue();
+    }
+
     public static void onInitialize() {
         MaLiLib.logger.info("PrinterConfig.onInitialize");
         FREE_LOOK_TOGGLE.getKeybind().setCallback(new FreeLookKeyCallbackToggle(FREE_LOOK));
@@ -123,6 +131,7 @@ public class PrinterConfig {
 
         final String name;
         final String displayName;
+
         InventoryManagementModeEnum(String name, String displayName) {
             this.name = name;
             this.displayName = displayName;

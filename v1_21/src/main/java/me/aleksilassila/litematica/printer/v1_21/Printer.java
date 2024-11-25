@@ -11,7 +11,6 @@ import me.aleksilassila.litematica.printer.v1_21.guides.Guides;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerAbilities;
-import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec2f;
@@ -98,7 +97,8 @@ public class Printer {
         if (!abilities.allowModifyWorld)
             return false;
 
-        if (PrinterConfig.STOP_ON_MOVEMENT.getBooleanValue() && player.getVelocity().length() > 0.1) return false; // Stop if the player is moving
+        if (PrinterConfig.STOP_ON_MOVEMENT.getBooleanValue() && player.getVelocity().length() > 0.1)
+            return false; // Stop if the player is moving
         if (PrinterConfig.PRINTER_DISABLE_IN_GUIS.getBooleanValue()) {
             if (mc.currentScreen != null) return false;
         }
@@ -185,7 +185,7 @@ public class Printer {
         }
 
         return positions.stream()
-                .filter(p -> playerOccupied.stream().noneMatch(p::equals))
+//                .filter(p -> playerOccupied.stream().noneMatch(p::equals))
                 .sorted((a, b) -> {
                     double aDistance = this.player.getPos().squaredDistanceTo(Vec3d.ofCenter(a));
                     double bDistance = this.player.getPos().squaredDistanceTo(Vec3d.ofCenter(b));
