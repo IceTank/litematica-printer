@@ -6,7 +6,7 @@
 ![GitHub Repo stars](https://img.shields.io/github/stars/aleksilassila/litematica-printer)
 
 > [!NOTE]
-> **The 1.21 version of litematica-printer only works on 2b if the client connects using any 1.20 version (1.20.4, 1.20.6 etc)**. The printer currently flags a specific 1.21 movement check in GrimAC preventing your from moving while placing blocks.
+> **The 1.21 version of litematica-printer only works on 2b if the client connects using any 1.20 version (1.20.4, 1.20.6 etc)**. The 1.21 printer currently flags a specific 1.21 movement check in GrimAC preventing your from moving while placing blocks.
 
 This extension adds printing functionality for [Litematica fabric](https://github.com/maruohon/litematica) 1.21, 1.20.4, 1.20.0 ,1.19, 1.18 and 1.17 versions. Printer allows players to build
 big structures more quickly by automatically placing the correct blocks around you.
