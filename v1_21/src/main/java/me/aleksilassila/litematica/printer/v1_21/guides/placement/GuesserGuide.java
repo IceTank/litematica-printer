@@ -60,14 +60,6 @@ public class GuesserGuide extends GeneralPlacementGuide {
         super(state);
     }
 
-
-    @Override
-    public boolean canExecute(ClientPlayerEntity player) {
-        if (targetState.getBlock() instanceof SlabBlock) return false; // Slabs are a special case
-
-        return super.canExecute(player);
-    }
-
     private boolean canSeeBlockFace(ClientPlayerEntity player, BlockHitResult hitResult) {
         // Draw a line between the player pos and the block pos and check if the block side is visible
         // BlockPos targetPos = state.blockPos;
