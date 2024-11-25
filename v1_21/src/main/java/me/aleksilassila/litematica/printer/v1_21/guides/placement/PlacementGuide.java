@@ -71,6 +71,8 @@ abstract public class PlacementGuide extends Guide {
         if (requiredItems.isEmpty() || requiredItems.stream().allMatch(i -> i.isOf(Items.AIR)))
             return false;
 
+        if (!currentState.isReplaceable()) return false;
+
         ItemPlacementContext ctx = getPlacementContext(player);
         if (ctx == null || !ctx.canPlace()) return false;
 //        if (!state.currentState.getMaterial().isReplaceable()) return false;

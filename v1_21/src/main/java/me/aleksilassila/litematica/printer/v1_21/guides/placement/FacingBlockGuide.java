@@ -50,21 +50,12 @@ public class FacingBlockGuide extends SlabGuide {
         return true;
     }
 
-    @Override
-    public boolean canExecute(ClientPlayerEntity player) {
-        if (!super.canExecute(player)) return false;
-        return true;
-//        Optional<Direction> rotation = getProperty(state.targetState, Properties.FACING);
-//
-//        return rotation.filter(direction -> player.getHorizontalFacing() == direction).isPresent();
-    }
-
     private Direction getRequiredHalf(SchematicBlockState state) {
         BlockState targetState = state.targetState;
         BlockState currentState = state.currentState;
 
         if (!currentState.contains(StairsBlock.HALF)) {
-            return targetState.get(StairsBlock.HALF) == BlockHalf.TOP ? Direction.UP : Direction.DOWN;
+            return targetState.get(StairsBlock.HALF) == BlockHalf.TOP ? Direction.DOWN : Direction.UP;
         } else if (currentState.get(StairsBlock.HALF) != targetState.get(StairsBlock.HALF)) {
             return currentState.get(StairsBlock.HALF) == BlockHalf.TOP ? Direction.DOWN : Direction.UP;
         } else {

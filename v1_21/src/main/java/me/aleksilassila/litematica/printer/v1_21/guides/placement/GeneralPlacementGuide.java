@@ -181,6 +181,9 @@ public class GeneralPlacementGuide extends PlacementGuide {
     @Override
     public boolean canExecute(ClientPlayerEntity player) {
         if (!super.canExecute(player)) return false;
+        if (!PrinterConfig.STRICT_BLOCK_FACE_CHECK.getBooleanValue()) {
+            return true;
+        }
         for (Direction side : getPossibleSides()) {
             if (canSeeBlockFace(player, new BlockHitResult(Vec3d.ofCenter(state.blockPos), side.getOpposite(), state.blockPos.offset(side), false))) {
                 return true;
@@ -301,6 +304,13 @@ public class GeneralPlacementGuide extends PlacementGuide {
             }
             final Direction side = Direction.UP;
             Vec3d hitVec = Vec3d.ofCenter(state.blockPos);
+            // Half-slab blocks and stairs. Offset hit vector so they are bottom or top blocks when placed
+//            if (this instanceof SlabGuide slabGuide) { // TODO: Fix
+//                Direction requireHalf = slabGuide.getPossibleSides().stream().findFirst().orElse(null);
+//                if (requireHalf == Direction.UP || requireHalf == Direction.DOWN) {
+//                    hitVec = hitVec.subtract(0, requireHalf.getOffsetY() * 0.25, 0);
+//                }
+//            }
             BlockPos neighborPos = state.blockPos.offset(side);
             BlockHitResult hitResult = new BlockHitResult(hitVec, side.getOpposite(), neighborPos, false);
             PrinterPlacementContext context = new PrinterPlacementContext(player, hitResult, requiredItem, slot, Direction.UP, false);
