@@ -5,9 +5,12 @@ import fi.dy.masa.litematica.config.Configs;
 import fi.dy.masa.malilib.config.IConfigBase;
 import fi.dy.masa.malilib.config.options.ConfigHotkey;
 import me.aleksilassila.litematica.printer.v1_21.LitematicaMixinMod;
+import me.aleksilassila.litematica.printer.v1_21.config.PrinterConfig;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
 
@@ -31,5 +34,10 @@ public class ConfigsMixin {
     @Redirect(method = "saveToFile", at = @At(value = "FIELD", target = "Lfi/dy/masa/litematica/config/Hotkeys;HOTKEY_LIST:Ljava/util/List;"))
     private static List<ConfigHotkey> moreeHotkeys() {
         return LitematicaMixinMod.getHotkeyList();
+    }
+
+    @Inject(method = "loadFromFile", at = @At("RETURN"))
+    private static void loadFromFilePost(CallbackInfo ci) {
+        PrinterConfig.onConfigFileLoad();
     }
 }
