@@ -3,6 +3,7 @@ package me.aleksilassila.litematica.printer.v1_21;
 import fi.dy.masa.litematica.config.Configs;
 import fi.dy.masa.litematica.materials.MaterialCache;
 import fi.dy.masa.litematica.world.WorldSchematic;
+import fi.dy.masa.malilib.config.options.ConfigString;
 import me.aleksilassila.litematica.printer.v1_21.config.PrinterConfig;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
@@ -22,8 +23,10 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.List;
 
 public class InventoryManager {
+    private static final List<Integer> USABLE_SLOTS = new ArrayList<>();
     int delay = 0;
     /**
      * The queue of items to pull from the inventory
@@ -36,12 +39,28 @@ public class InventoryManager {
     private static InventoryManager instance;
     private InventoryManager() {
         // Probably add a way to configure this
-        for (int i = 3; i < 9; i++) {
+        for (int i = 0; i < 9; i++) {
             rollingSlots.add(i);
             lastUsedSlots.add(i);
-        }
-        for (int i = 0; i < 9; i++) {
             hotbarSlots.add(new SlotInfo());
+        }
+    }
+
+    public static void setHotbarSlots(ConfigString config) {
+        USABLE_SLOTS.clear();
+        String configStr = config.getStringValue();
+        String[] parts = configStr.split(",");
+
+        for (String str : parts) {
+            try {
+                int slotNum = Integer.parseInt(str) - 1;
+
+                if (PlayerInventory.isValidHotbarIndex(slotNum) &&
+                        !USABLE_SLOTS.contains(slotNum)) {
+                    USABLE_SLOTS.add(slotNum);
+                }
+            } catch (NumberFormatException ignore) {
+            }
         }
     }
 
@@ -80,6 +99,9 @@ public class InventoryManager {
             return false;
         }
         int nextSlot = nextHotbarSlot();
+        if (nextSlot == -1) {
+            return false;
+        }
         hotbarSlots.get(nextSlot).addTicksLocked(10);
         hotbarSlots.get(nextSlot).waitingForItem = item;
         player.getInventory().selectedSlot = nextSlot;
@@ -172,7 +194,7 @@ public class InventoryManager {
                     if (swapToHotbar(mc.player, itemStack.getItem())) {
                         // If true the item should now be somewhere in the hotbar
                         hotbarSlot = getHotbarSlotWithItem(player, itemStack);
-                        if (hotbarSlot != -1) {
+                        if (hotbarSlot == -1) {
                             return false;
                         }
                         player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(hotbarSlot));
@@ -210,7 +232,12 @@ public class InventoryManager {
 
         if (PrinterConfig.InventoryManagementModeEnum.LEAST_USED.is(mode)) {
             if (!lastUsedSlots.isEmpty()) {
-                int last = lastUsedSlots.pollLast();
+                List<Integer> usableSlots = lastUsedSlots.stream().filter(USABLE_SLOTS::contains).toList();
+                if (usableSlots.isEmpty()) {
+                    return -1;
+                }
+                int last = usableSlots.getLast();
+                lastUsedSlots.remove(last);
                 lastUsedSlots.addFirst(last);
                 if (PrinterConfig.PRINTER_DEBUG_LOG.getBooleanValue()) {
                     System.out.println("Next new least used slot: " + last + "Last used slots: " + lastUsedSlots);
@@ -219,7 +246,12 @@ public class InventoryManager {
             }
         } else if (PrinterConfig.InventoryManagementModeEnum.ROLLING.is(mode)) {
             if (!rollingSlots.isEmpty()) {
-                int slot = rollingSlots.pollFirst();
+                List<Integer> usableSlots = rollingSlots.stream().filter(USABLE_SLOTS::contains).toList();
+                if (usableSlots.isEmpty()) {
+                    return -1;
+                }
+                int slot = usableSlots.getLast();
+                rollingSlots.remove(slot);
                 rollingSlots.addLast(slot);
                 if (PrinterConfig.PRINTER_DEBUG_LOG.getBooleanValue()) {
                     System.out.println("Next new rolling slot: " + slot + "Rolling slots: " + rollingSlots);
@@ -230,7 +262,7 @@ public class InventoryManager {
         if (PrinterConfig.PRINTER_DEBUG_LOG.getBooleanValue()) {
             System.out.println("No slots available");
         }
-        return 3;
+        return -1;
     }
 
     /**
@@ -287,7 +319,6 @@ public class InventoryManager {
         private int ticksLocked = 0;
         @Nullable
         public Item waitingForItem = null;
-        private boolean canUse = true;
 
         public void addTicksLocked(int ticks) {
             ticksLocked += ticks;
@@ -295,18 +326,6 @@ public class InventoryManager {
 
         public void decrementTicksLocked() {
             ticksLocked--;
-        }
-
-        public void setCanUse(boolean canUse) {
-            this.canUse = canUse;
-        }
-
-        public boolean isCanUse() {
-            return canUse;
-        }
-
-        public boolean isFree() {
-            return ticksLocked == 0 && canUse;
         }
     }
 }

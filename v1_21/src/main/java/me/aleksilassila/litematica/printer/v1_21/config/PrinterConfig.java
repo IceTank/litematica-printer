@@ -8,6 +8,7 @@ import fi.dy.masa.malilib.config.IConfigOptionListEntry;
 import fi.dy.masa.malilib.config.options.*;
 import fi.dy.masa.malilib.event.InputEventHandler;
 import fi.dy.masa.malilib.hotkeys.KeybindSettings;
+import me.aleksilassila.litematica.printer.v1_21.InventoryManager;
 import me.aleksilassila.litematica.printer.v1_21.Printer;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -66,6 +67,7 @@ public class PrinterConfig {
     public static final ConfigDouble PRINTER_AIRPLACE_RANGE = new ConfigDouble("printerAirPlaceRange", 5, 0, 10, "Range at which the printer can air place at");
     public static final ConfigBoolean PRINTER_AIRPLACE_FLOATING_ONLY = new ConfigBoolean("printerAirPlaceFloatingOnly", false, "Only attempt to air place if the block position is surrounded by air.");
     public static final ConfigInteger PRINTER_MIN_INACTIVE_TIME_AIR_PLACE = new ConfigInteger("printerMinInactiveTimeAirPlace", 5, "Minimum time in ticks to wait before placing a block in the air.");
+    public static final ConfigString PRINTER_HOTBAR_SLOTS = new ConfigString("printerHotbarSlots", "3,4,5,6,7,8,9", "Hotbar slots to use for the printer. Numbers from 1-9 separated by commas.");
 
     public ImmutableList<IConfigBase> getOptions() {
         List<IConfigBase> list = new java.util.ArrayList<>(Configs.Generic.OPTIONS);
@@ -100,6 +102,7 @@ public class PrinterConfig {
         list.add(PRINTER_AIRPLACE_RANGE);
         list.add(PRINTER_AIRPLACE_FLOATING_ONLY);
         list.add(PRINTER_MIN_INACTIVE_TIME_AIR_PLACE);
+        list.add(PRINTER_HOTBAR_SLOTS);
 
         PRINTER_DEBUG_LOG.setValueChangeCallback(config -> {
             if (config.getBooleanValue()) {
@@ -110,6 +113,8 @@ public class PrinterConfig {
                 Configurator.setLevel(LogManager.getLogger(Printer.logger.getName()), Level.INFO);
             }
         });
+
+        PRINTER_HOTBAR_SLOTS.setValueChangeCallback(InventoryManager::setHotbarSlots);
 
         return ImmutableList.copyOf(list);
     }
@@ -123,6 +128,10 @@ public class PrinterConfig {
         FREE_LOOK_TOGGLE.getKeybind().setCallback(new FreeLookKeyCallbackToggle(FREE_LOOK));
         PRINTER_PICK_BLOCK.getKeybind().setCallback(new PrinterPickBlockKeyCallback());
         InputEventHandler.getKeybindManager().registerKeybindProvider(PrinterInputHandler.getInstance());
+    }
+
+    public static void onConfigFileLoad() {
+        InventoryManager.setHotbarSlots(PRINTER_HOTBAR_SLOTS);
     }
 
     public enum InventoryManagementModeEnum implements IConfigOptionListEntry {
