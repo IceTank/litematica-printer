@@ -4,10 +4,12 @@
   "package": "me.aleksilassila.litematica.printer.v1_21.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
+    "LitematicaSchematicAccessor",
     "MixinClientConnection"
   ],
   "client": [
     "AxeItemAccessor",
+    "ButtonListenerMixin",
     "ConfigsMixin",
     "GuiConfigsMixin",
     "InputHandlerMixin",
