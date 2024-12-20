@@ -133,7 +133,7 @@ public class PrepareLook extends Action {
             for (PlayerMoveC2SPacket.Full packet : packets) {
                 this.yaw = Optional.of(packet.getYaw(player.getYaw()));
                 this.pitch = Optional.of(packet.getPitch(player.getPitch()));
-                player.networkHandler.sendPacket(packet);
+//                player.networkHandler.sendPacket(packet);
             }
 
             PlayerMoveC2SPacket.Full lastPacket = packets.get(packets.size() - 1);
@@ -145,7 +145,7 @@ public class PrepareLook extends Action {
 
             this.yaw = Optional.of(yaw);
             this.pitch = Optional.of(pitch);
-            player.networkHandler.sendPacket(lastPacket);
+//            player.networkHandler.sendPacket(lastPacket);
         } else {
             float yaw = player.getYaw();
             float pitch = player.getPitch();
@@ -155,7 +155,7 @@ public class PrepareLook extends Action {
 
             this.yaw = Optional.of(yaw);
             this.pitch = Optional.of(pitch);
-            player.networkHandler.sendPacket(packet);
+//            player.networkHandler.sendPacket(packet);
         }
         return true;
     }
