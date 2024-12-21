@@ -8,7 +8,7 @@ public class ReleaseShiftAction extends Action {
     @Override
     public boolean send(MinecraftClient client, ClientPlayerEntity player) {
         player.input.sneaking = false;
-        player.networkHandler.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
+//        player.networkHandler.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
         return true;
     }
 }

@@ -1,6 +1,7 @@
 package me.aleksilassila.litematica.printer.v1_21.actions;
 
 import me.aleksilassila.litematica.printer.v1_21.LitematicaMixinMod;
+import me.aleksilassila.litematica.printer.v1_21.Printer;
 import me.aleksilassila.litematica.printer.v1_21.implementation.PrinterPlacementContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -23,6 +24,11 @@ abstract public class InteractAction extends Action {
 
         if (LitematicaMixinMod.DEBUG)
             System.out.println("InteractAction.send: Blockpos: " + context.getBlockPos() + " Side: " + context.getSide() + " HitPos: " + context.getHitPos());
+        if (context.isAirPlace) {
+            Printer.addTimeout(context.getBlockPos().offset(context.getSide()));
+        } else {
+            Printer.addTimeout(context.getBlockPos());
+        }
         return true;
     }
 

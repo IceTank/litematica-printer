@@ -49,6 +49,9 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
         if (LitematicaMixinMod.freeLook.getPrevPerspective() == null) {
             LitematicaMixinMod.freeLook.setPrevPerspective(client.options.getPerspective());
         }
+        if (LitematicaMixinMod.printer != null) {
+//            LitematicaMixinMod.printer.actionHandler.onPostTick();
+        }
     }
 
     @Inject(at = @At("HEAD"), method = "tick")
@@ -58,7 +61,10 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
             System.out.println("Initializing printer, player: " + clientPlayer + ", client: " + client);
             LitematicaMixinMod.printer = new Printer(client, clientPlayer);
         }
+        LitematicaMixinMod.printer.actionHandler.processPreviousTickActions();
         LitematicaMixinMod.printer.onGameTick();
+        LitematicaMixinMod.printer.actionHandler.processCurrentTickActions();
+        Printer.inventoryManager.tick();
         LitematicaMixinMod.freeLook.onGameTick();
         LitematicaMixinMod.movementHandler.onGameTick();
     }

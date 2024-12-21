@@ -197,15 +197,19 @@ public class InventoryManager {
                         if (hotbarSlot == -1) {
                             return false;
                         }
-                        player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(hotbarSlot));
-                        player.getInventory().selectedSlot = hotbarSlot;
+                        if (hotbarSlot != player.getInventory().selectedSlot) {
+                            player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(hotbarSlot));
+                            player.getInventory().selectedSlot = hotbarSlot;
+                        }
                         updateLastUsedSlot(hotbarSlot);
                         return true;
                     }
                     return false;
                 } else {
-                    player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(hotbarSlot));
-                    player.getInventory().selectedSlot = hotbarSlot;
+                    if (hotbarSlot != player.getInventory().selectedSlot) {
+                        player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(hotbarSlot));
+                        player.getInventory().selectedSlot = hotbarSlot;
+                    }
                     updateLastUsedSlot(hotbarSlot);
                     return true;
                 }

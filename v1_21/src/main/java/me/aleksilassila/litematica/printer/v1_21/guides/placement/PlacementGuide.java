@@ -131,8 +131,8 @@ abstract public class PlacementGuide extends Guide {
         ActionChain actionChain = new ActionChain();
 
         if (ctx.isAirPlace) {
-            actionChain.addAction(new PrepareAction(ctx));
-            actionChain.addAction(new AirPlaceAction(ctx));
+            actionChain.addImmediateAction(new PrepareAction(ctx));
+            actionChain.addImmediateAction(new AirPlaceAction(ctx));
             actions.add(actionChain);
             return actions;
         } else {
@@ -141,11 +141,11 @@ abstract public class PlacementGuide extends Guide {
             }
         }
 
-        actionChain.addAction(new PrepareLook(ctx));
-        actionChain.addAction(new PrepareAction(ctx));
-        if (ctx.shouldSneak) actionChain.addAction(new PresShift());
-        actionChain.addAction(new InteractActionImpl(ctx));
-        if (ctx.shouldSneak) actionChain.addAction(new ReleaseShiftAction());
+        actionChain.addImmediateAction(new PrepareLook(ctx));
+        actionChain.addImmediateAction(new PrepareAction(ctx));
+        if (ctx.shouldSneak) actionChain.addImmediateAction(new PresShift());
+        actionChain.addNextTickAction(new InteractActionImpl(ctx));
+        if (ctx.shouldSneak) actionChain.addNextTickAction(new ReleaseShiftAction());
         actions.add(actionChain);
 
         return actions;
