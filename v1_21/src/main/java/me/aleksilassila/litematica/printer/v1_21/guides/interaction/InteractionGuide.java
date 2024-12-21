@@ -40,9 +40,9 @@ public abstract class InteractionGuide extends Guide {
 
         ActionChain chain = new ActionChain();
 
-        chain.addAction(new ReleaseShiftAction());
-        chain.addAction(new PrepareAction(ctx));
-        chain.addAction(new InteractActionImpl(ctx));
+        chain.addImmediateAction(new ReleaseShiftAction());
+        chain.addImmediateAction(new PrepareAction(ctx));
+        chain.addImmediateAction(new InteractActionImpl(ctx));
 
         actions.add(chain);
 

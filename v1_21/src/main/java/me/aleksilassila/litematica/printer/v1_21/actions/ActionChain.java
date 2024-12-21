@@ -1,6 +1,5 @@
 package me.aleksilassila.litematica.printer.v1_21.actions;
 
-import me.aleksilassila.litematica.printer.v1_21.config.PrinterConfig;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 
@@ -8,30 +7,29 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ActionChain extends Action {
-    List<Action> actions = new ArrayList<>();
+    List<Action> actionsCurrentTick = new ArrayList<>();
+    List<Action> actionsNextTick = new ArrayList<>();
 
     @Override
     public boolean send(MinecraftClient client, ClientPlayerEntity player) {
-        for (Action action : actions) {
-            if (!action.send(client, player)) {
-                if (PrinterConfig.PRINTER_DEBUG_LOG.getBooleanValue()) {
-                    System.out.println("ActionChain.send: Chain failed at " + action);
-                }
-                return false;
-            }
-        }
-        return true;
+        throw new RuntimeException("ActionChain should not be sent. Manually send each preTick and postTick action.");
     }
 
-    public void addAction(Action action) {
-        actions.add(action);
+    public void addImmediateAction(Action action) {
+        actionsCurrentTick.add(action);
+    }
+    public void addNextTickAction(Action action) {
+        actionsNextTick.add(action);
     }
 
     public void clear() {
-        actions.clear();
+        actionsCurrentTick.clear();
     }
 
-    public List<Action> getActions() {
-        return actions;
+    public List<Action> getActionsCurrentTick() {
+        return actionsCurrentTick;
+    }
+    public List<Action> getActionsNextTick() {
+        return actionsNextTick;
     }
 }

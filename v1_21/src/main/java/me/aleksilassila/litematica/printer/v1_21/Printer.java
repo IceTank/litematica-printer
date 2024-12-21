@@ -76,11 +76,6 @@ public class Printer {
             }
         }
 
-        actionHandler.onGameTick();
-        inventoryManager.tick();
-
-        // if (!actionHandler.acceptsActions()) return false;
-
         if (worldSchematic == null) return false;
 
         if (PrinterConfig.TICK_DELAY.getIntegerValue() != 0 && delayCounter < PrinterConfig.TICK_DELAY.getIntegerValue()) {

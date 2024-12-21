@@ -21,7 +21,7 @@ public class InteractActionImpl extends InteractAction {
         if (!result.isAccepted()) {
             if (PrinterConfig.PRINTER_DEBUG_LOG.getBooleanValue()) System.out.println("Failed to interact with block got " + result);
         }
-        mc.player.swingHand(Hand.MAIN_HAND, false);
+        mc.player.swingHand(Hand.MAIN_HAND);
         return result;
     }
 }
