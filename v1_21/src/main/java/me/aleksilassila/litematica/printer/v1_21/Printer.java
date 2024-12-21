@@ -65,16 +65,6 @@ public class Printer {
         // If the inactivityCounter is greater than the inactive snap back value, then set the lastRotation to the current rotation
         // This is used to snap back to the last rotation when the player is inactive
         inactivityCounter++;
-        if (PrinterConfig.SNAP_BACK.getBooleanValue()) {
-            if (inactivityCounter == PrinterConfig.INACTIVE_SNAP_BACK.getIntegerValue()) {
-                if (lastRotation != null) {
-                    player.setYaw(lastRotation.x);
-                    player.setPitch(lastRotation.y);
-                }
-            } else if (inactivityCounter > PrinterConfig.INACTIVE_SNAP_BACK.getIntegerValue()) {
-                lastRotation = new Vec2f(player.getYaw(), player.getPitch());
-            }
-        }
 
         if (worldSchematic == null) return false;
 
@@ -192,10 +182,10 @@ public class Printer {
         blockPosTimeout.add(new BlockTimeout(pos, PrinterConfig.BLOCK_TIMEOUT.getIntegerValue()));
     }
 
-    public void rotate(float v, float v1) {
+    public void rotate(float yaw, float pitch) {
         LitematicaMixinMod.freeLook.ticksSinceLastRotation = 0;
-        this.player.setYaw(v);
-        this.player.setPitch(v1);
+        this.player.setYaw(yaw);
+        this.player.setPitch(pitch);
     }
 
     public static class BlockTimeout {
