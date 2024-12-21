@@ -68,11 +68,12 @@ public class PrepareLook extends Action {
 
     /**
      * Returns the yaw difference between two yaw values.
+     *
      * @param yaw1 The first yaw value.
      * @param yaw2 The second yaw value.
      * @return The yaw difference.
      */
-    public static float deltaYaw (float yaw1, float yaw2) {
+    public static float deltaYaw(float yaw1, float yaw2) {
         final float PI_2 = (float) (Math.PI * 2);
         float dYaw = (yaw1 - yaw2) % PI_2;
         if (dYaw < -Math.PI) dYaw += PI_2;
@@ -102,7 +103,8 @@ public class PrepareLook extends Action {
                 float pitchDelta = targetRot[1] - lastRot[1];
                 if (PrinterConfig.INTERPOLATE_LOOK.getBooleanValue()) {
                     rotationDone = true;
-                    if (PrinterConfig.PRINTER_DEBUG_LOG.getBooleanValue()) System.out.println("Yaw delta: " + yawDelta + ", pitch delta: " + pitchDelta);
+                    if (PrinterConfig.PRINTER_DEBUG_LOG.getBooleanValue())
+                        System.out.println("Yaw delta: " + yawDelta + ", pitch delta: " + pitchDelta);
                     if (Math.abs(yawDelta) > maxDeltaYaw) {
                         lastRot[0] += clamp(yawDelta, (float) -maxDeltaYaw, (float) maxDeltaYaw);
                         rotationDone = false;
@@ -121,7 +123,8 @@ public class PrepareLook extends Action {
                     rotationDone = true;
                 }
 
-                if (PrinterConfig.PRINTER_DEBUG_LOG.getBooleanValue()) System.out.println("Sending yaw for stealth 1: " + lastRot[0] + ", pitch: " + lastRot[1]);
+                if (PrinterConfig.PRINTER_DEBUG_LOG.getBooleanValue())
+                    System.out.println("Sending yaw for stealth 1: " + lastRot[0] + ", pitch: " + lastRot[1]);
                 PlayerMoveC2SPacket.Full packet = new PlayerMoveC2SPacket.Full(player.getX(), player.getY(), player.getZ(), lastRot[0], lastRot[1], player.isOnGround());
 
                 if (PrinterConfig.ROTATE_PLAYER.getBooleanValue()) {
@@ -133,7 +136,7 @@ public class PrepareLook extends Action {
             for (PlayerMoveC2SPacket.Full packet : packets) {
                 this.yaw = Optional.of(packet.getYaw(player.getYaw()));
                 this.pitch = Optional.of(packet.getPitch(player.getPitch()));
-                player.networkHandler.sendPacket(packet);
+//                player.networkHandler.sendPacket(packet);
             }
 
             PlayerMoveC2SPacket.Full lastPacket = packets.get(packets.size() - 1);
@@ -145,17 +148,18 @@ public class PrepareLook extends Action {
 
             this.yaw = Optional.of(yaw);
             this.pitch = Optional.of(pitch);
-            player.networkHandler.sendPacket(lastPacket);
+//            player.networkHandler.sendPacket(lastPacket);
         } else {
             float yaw = player.getYaw();
             float pitch = player.getPitch();
 
-            if (PrinterConfig.PRINTER_DEBUG_LOG.getBooleanValue()) System.out.println("Sending yaw for modified yaw: " + yaw + ", pitch: " + pitch);
+            if (PrinterConfig.PRINTER_DEBUG_LOG.getBooleanValue())
+                System.out.println("Sending yaw for modified yaw: " + yaw + ", pitch: " + pitch);
             PlayerMoveC2SPacket packet = new PlayerMoveC2SPacket.Full(player.getX(), player.getY(), player.getZ(), yaw, pitch, player.isOnGround());
 
             this.yaw = Optional.of(yaw);
             this.pitch = Optional.of(pitch);
-            player.networkHandler.sendPacket(packet);
+//            player.networkHandler.sendPacket(packet);
         }
         return true;
     }

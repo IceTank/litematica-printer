@@ -4,7 +4,6 @@ import me.aleksilassila.litematica.printer.v1_20_4.SchematicBlockState;
 import me.aleksilassila.litematica.printer.v1_20_4.implementation.PrinterPlacementContext;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ChestBlock;
-import net.minecraft.block.SlabBlock;
 import net.minecraft.block.enums.ChestType;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -19,7 +18,7 @@ import net.minecraft.util.math.Vec3d;
  * by brute forcing the correct hit vector and look direction.
  */
 public class GuesserGuide extends GeneralPlacementGuide {
-    private PrinterPlacementContext contextCache = null;
+    private final PrinterPlacementContext contextCache = null;
     private final MinecraftClient mc = MinecraftClient.getInstance();
 
     protected static Direction[] directionsToTry = new Direction[]{
@@ -58,14 +57,6 @@ public class GuesserGuide extends GeneralPlacementGuide {
 
     public GuesserGuide(SchematicBlockState state) {
         super(state);
-    }
-
-
-    @Override
-    public boolean canExecute(ClientPlayerEntity player) {
-        if (targetState.getBlock() instanceof SlabBlock) return false; // Slabs are a special case
-
-        return super.canExecute(player);
     }
 
     private boolean canSeeBlockFace(ClientPlayerEntity player, BlockHitResult hitResult) {

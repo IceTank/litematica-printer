@@ -8,6 +8,7 @@ import fi.dy.masa.malilib.config.IConfigOptionListEntry;
 import fi.dy.masa.malilib.config.options.*;
 import fi.dy.masa.malilib.event.InputEventHandler;
 import fi.dy.masa.malilib.hotkeys.KeybindSettings;
+import me.aleksilassila.litematica.printer.v1_20_4.InventoryManager;
 import me.aleksilassila.litematica.printer.v1_20_4.Printer;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -17,7 +18,9 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 public class PrinterConfig {
-    private PrinterConfig() {}
+    private PrinterConfig() {
+    }
+
     @Nullable
     public static PrinterConfig INSTANCE;
 
@@ -27,6 +30,7 @@ public class PrinterConfig {
         }
         return INSTANCE;
     }
+
     public static final ConfigInteger TICK_DELAY = new ConfigInteger("printerTickDelay", 0, 0, 100, "Tick delay between actions. 0 = no delay.");
     public static final ConfigInteger BLOCK_TIMEOUT = new ConfigInteger("printerBlockTimeout", 10, 0, 100, "How many ticks to wait before trying to place the same block again.");
     public static final ConfigBoolean ROTATE_PLAYER = new ConfigBoolean("printerRotatePlayer", true, "Rotate the player to face the block to place.");
@@ -63,6 +67,9 @@ public class PrinterConfig {
     public static final ConfigDouble PRINTER_AIRPLACE_RANGE = new ConfigDouble("printerAirPlaceRange", 5, 0, 10, "Range at which the printer can air place at");
     public static final ConfigBoolean PRINTER_AIRPLACE_FLOATING_ONLY = new ConfigBoolean("printerAirPlaceFloatingOnly", false, "Only attempt to air place if the block position is surrounded by air.");
     public static final ConfigInteger PRINTER_MIN_INACTIVE_TIME_AIR_PLACE = new ConfigInteger("printerMinInactiveTimeAirPlace", 5, "Minimum time in ticks to wait before placing a block in the air.");
+    public static final ConfigString PRINTER_HOTBAR_SLOTS = new ConfigString("printerHotbarSlots", "3,4,5,6,7,8,9", "Hotbar slots to use for the printer. Numbers from 1-9 separated by commas.");
+    public static final ConfigBoolean AUTO_CONVERT_SCHEMATIC_TO_LITEMATIC_ON_LOAD = new ConfigBoolean("autoConvertSchematicToLitematicOnLoad", false, "Automatically convert schematic files to litematic files when loading them.");
+
     public ImmutableList<IConfigBase> getOptions() {
         List<IConfigBase> list = new java.util.ArrayList<>(Configs.Generic.OPTIONS);
         list.add(TICK_DELAY);
@@ -96,6 +103,8 @@ public class PrinterConfig {
         list.add(PRINTER_AIRPLACE_RANGE);
         list.add(PRINTER_AIRPLACE_FLOATING_ONLY);
         list.add(PRINTER_MIN_INACTIVE_TIME_AIR_PLACE);
+        list.add(PRINTER_HOTBAR_SLOTS);
+        list.add(AUTO_CONVERT_SCHEMATIC_TO_LITEMATIC_ON_LOAD);
 
         PRINTER_DEBUG_LOG.setValueChangeCallback(config -> {
             if (config.getBooleanValue()) {
@@ -107,7 +116,13 @@ public class PrinterConfig {
             }
         });
 
+        PRINTER_HOTBAR_SLOTS.setValueChangeCallback(InventoryManager::setHotbarSlots);
+
         return ImmutableList.copyOf(list);
+    }
+
+    public static boolean isDebug() {
+        return PRINTER_DEBUG_LOG.getBooleanValue();
     }
 
     public static void onInitialize() {
@@ -117,12 +132,17 @@ public class PrinterConfig {
         InputEventHandler.getKeybindManager().registerKeybindProvider(PrinterInputHandler.getInstance());
     }
 
+    public static void onConfigFileLoad() {
+        InventoryManager.setHotbarSlots(PRINTER_HOTBAR_SLOTS);
+    }
+
     public enum InventoryManagementModeEnum implements IConfigOptionListEntry {
         ROLLING("rolling", "Rolling"),
         LEAST_USED("leastUsed", "Least Used");
 
         final String name;
         final String displayName;
+
         InventoryManagementModeEnum(String name, String displayName) {
             this.name = name;
             this.displayName = displayName;

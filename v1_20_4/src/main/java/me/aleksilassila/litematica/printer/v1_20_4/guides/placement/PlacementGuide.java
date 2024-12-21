@@ -15,7 +15,9 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
@@ -33,6 +35,7 @@ import java.util.Optional;
  */
 abstract public class PlacementGuide extends Guide {
     MinecraftClient mc = MinecraftClient.getInstance();
+
     public PlacementGuide(SchematicBlockState state) {
         super(state);
     }
@@ -71,6 +74,8 @@ abstract public class PlacementGuide extends Guide {
         if (requiredItems.isEmpty() || requiredItems.stream().allMatch(i -> i.isOf(Items.AIR)))
             return false;
 
+        if (!currentState.isReplaceable()) return false;
+
         ItemPlacementContext ctx = getPlacementContext(player);
         if (ctx == null || !ctx.canPlace()) return false;
 //        if (!state.currentState.getMaterial().isReplaceable()) return false;
@@ -83,6 +88,12 @@ abstract public class PlacementGuide extends Guide {
                 .getPlacementState(ctx);
 
         if (resultState != null) {
+            if (collidesWithPlayer(resultState)) {
+                if (PrinterConfig.isDebug()) {
+                    System.out.println("Block collides with player. Not placing.");
+                }
+                return false;
+            }
             if (!resultState.canPlaceAt(state.world, state.blockPos)) return false;
             return !(currentState.getBlock() instanceof FluidBlock) || canPlaceInWater(resultState);
         } else {
@@ -91,14 +102,24 @@ abstract public class PlacementGuide extends Guide {
 
     }
 
-    public boolean isInAir(BlockPos pos){
-        if(mc.world == null ) return false;
-        for(Direction dir : Direction.values()){
-            if(!mc.world.getBlockState(pos.offset(dir)).isAir()){
+    public boolean isInAir(BlockPos pos) {
+        if (mc.world == null) return false;
+        for (Direction dir : Direction.values()) {
+            if (!mc.world.getBlockState(pos.offset(dir)).isAir()) {
                 return false;
             }
         }
         return true;
+    }
+
+    private boolean collidesWithPlayer(BlockState blockState) {
+        if (mc.player == null || mc.world == null) return true;
+
+        VoxelShape shape = blockState.getCollisionShape(state.schematic, state.blockPos);
+        if (shape.isEmpty()) return false;
+        shape = shape.offset(state.blockPos.getX(), state.blockPos.getY(), state.blockPos.getZ());
+        Box playerShape = mc.player.getBoundingBox();
+        return VoxelShapes.matchesAnywhere(VoxelShapes.cuboid(playerShape), shape, BooleanBiFunction.AND);
     }
 
     @Override
@@ -110,8 +131,8 @@ abstract public class PlacementGuide extends Guide {
         ActionChain actionChain = new ActionChain();
 
         if (ctx.isAirPlace) {
-            actionChain.addAction(new PrepareAction(ctx));
-            actionChain.addAction(new AirPlaceAction(ctx));
+            actionChain.addImmediateAction(new PrepareAction(ctx));
+            actionChain.addImmediateAction(new AirPlaceAction(ctx));
             actions.add(actionChain);
             return actions;
         } else {
@@ -120,11 +141,11 @@ abstract public class PlacementGuide extends Guide {
             }
         }
 
-        actionChain.addAction(new PrepareLook(ctx));
-        actionChain.addAction(new PrepareAction(ctx));
-        if (ctx.shouldSneak) actionChain.addAction(new PresShift());
-        actionChain.addAction(new InteractActionImpl(ctx));
-        if (ctx.shouldSneak) actionChain.addAction(new ReleaseShiftAction());
+        actionChain.addImmediateAction(new PrepareLook(ctx));
+        actionChain.addImmediateAction(new PrepareAction(ctx));
+        if (ctx.shouldSneak) actionChain.addImmediateAction(new PresShift());
+        actionChain.addNextTickAction(new InteractActionImpl(ctx));
+        if (ctx.shouldSneak) actionChain.addNextTickAction(new ReleaseShiftAction());
         actions.add(actionChain);
 
         return actions;

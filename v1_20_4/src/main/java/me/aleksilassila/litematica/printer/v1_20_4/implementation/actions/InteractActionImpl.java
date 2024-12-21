@@ -13,14 +13,17 @@ public class InteractActionImpl extends InteractAction {
     public InteractActionImpl(PrinterPlacementContext context) {
         super(context);
     }
+
     private final MinecraftClient mc = MinecraftClient.getInstance();
+
     @Override
     protected ActionResult interact(MinecraftClient client, ClientPlayerEntity player, Hand hand, BlockHitResult hitResult) {
         ActionResult result = client.interactionManager.interactBlock(player, hand, hitResult);
         if (!result.isAccepted()) {
-            if (PrinterConfig.PRINTER_DEBUG_LOG.getBooleanValue()) System.out.println("Failed to interact with block got " + result);
+            if (PrinterConfig.PRINTER_DEBUG_LOG.getBooleanValue())
+                System.out.println("Failed to interact with block got " + result);
         }
-        mc.player.swingHand(Hand.MAIN_HAND, false);
+        mc.player.swingHand(Hand.MAIN_HAND);
         return result;
     }
 }

@@ -5,7 +5,6 @@ import me.aleksilassila.litematica.printer.v1_20_4.LitematicaMixinMod;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
 import net.minecraft.util.math.MathHelper;
-import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -15,14 +14,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = Mouse.class)
 public class MixinMouse {
-    @Shadow private double cursorDeltaX;
-    @Shadow private double cursorDeltaY;
+    @Shadow
+    private double cursorDeltaX;
+    @Shadow
+    private double cursorDeltaY;
 
-    @Shadow @Final private MinecraftClient client;
+    @Shadow
+    @Final
+    private MinecraftClient client;
+
     @Inject(method = "updateMouse",
-            at = @At(value = "FIELD",
-                    target = "Lnet/minecraft/client/Mouse;cursorDeltaX:D",
-                    opcode = Opcodes.PUTFIELD,
+            at = @At(value = "INVOKE",
+                    target = "Lnet/minecraft/client/MinecraftClient;getTutorialManager()Lnet/minecraft/client/tutorial/TutorialManager;",
                     shift = At.Shift.BEFORE
             ), cancellable = true
     )
@@ -50,7 +53,7 @@ public class MixinMouse {
             cursorDeltaY = 0.0;
             if (freeLook.shouldRotate()) {
                 if (this.client.player != null) {
-                    this.client.player.changeLookDirection(k, l * (double)m);
+                    this.client.player.changeLookDirection(k, l * (double) m);
                 }
             }
             ci.cancel();

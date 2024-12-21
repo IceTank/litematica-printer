@@ -1,12 +1,12 @@
 package me.aleksilassila.litematica.printer.v1_20_4.guides.interaction;
 
-import me.aleksilassila.litematica.printer.v1_20_4.actions.ActionChain;
-import me.aleksilassila.litematica.printer.v1_20_4.implementation.PrinterPlacementContext;
 import me.aleksilassila.litematica.printer.v1_20_4.SchematicBlockState;
 import me.aleksilassila.litematica.printer.v1_20_4.actions.Action;
+import me.aleksilassila.litematica.printer.v1_20_4.actions.ActionChain;
 import me.aleksilassila.litematica.printer.v1_20_4.actions.PrepareAction;
 import me.aleksilassila.litematica.printer.v1_20_4.actions.ReleaseShiftAction;
 import me.aleksilassila.litematica.printer.v1_20_4.guides.Guide;
+import me.aleksilassila.litematica.printer.v1_20_4.implementation.PrinterPlacementContext;
 import me.aleksilassila.litematica.printer.v1_20_4.implementation.actions.InteractActionImpl;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -40,9 +40,9 @@ public abstract class InteractionGuide extends Guide {
 
         ActionChain chain = new ActionChain();
 
-        chain.addAction(new ReleaseShiftAction());
-        chain.addAction(new PrepareAction(ctx));
-        chain.addAction(new InteractActionImpl(ctx));
+        chain.addImmediateAction(new ReleaseShiftAction());
+        chain.addImmediateAction(new PrepareAction(ctx));
+        chain.addImmediateAction(new InteractActionImpl(ctx));
 
         actions.add(chain);
 
