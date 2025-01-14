@@ -27,10 +27,10 @@ dependencies {
     modImplementation("net.fabricmc.fabric-api:fabric-api:${fabric_version}")
     //Replace Masa malilib with sakura-ryoko fork
     //modImplementation("fi.dy.masa.malilib:malilib-fabric-${malilib_version}")
-    modImplementation("com.github.sakura-ryoko:malilib:1.21-sakura.4")
+    modImplementation("com.github.sakura-ryoko:malilib:1.21-0.21.6")
     //Replace masa litematica with sakura-ryoko fork
     //modImplementation("curse.maven:litematica-${litematica_projectid}:${litematica_fileid}")
-    modImplementation("com.github.sakura-ryoko:litematica:1.21-sakura.8")
+    modImplementation("com.github.sakura-ryoko:litematica:1.21-0.19.55")
 }
 
 repositories {
