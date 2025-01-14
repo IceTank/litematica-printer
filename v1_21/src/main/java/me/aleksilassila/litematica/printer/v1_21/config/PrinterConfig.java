@@ -99,10 +99,10 @@ public class PrinterConfig {
 
         PRINTER_DEBUG_LOG.setValueChangeCallback(config -> {
             if (config.getBooleanValue()) {
-                MaLiLib.logger.info("Printer debug logging enabled");
+                MaLiLib.LOGGER.info("Printer debug logging enabled");
                 Configurator.setLevel(LogManager.getLogger(Printer.logger.getName()), Level.DEBUG);
             } else {
-                MaLiLib.logger.info("Printer debug logging disabled");
+                MaLiLib.LOGGER.info("Printer debug logging disabled");
                 Configurator.setLevel(LogManager.getLogger(Printer.logger.getName()), Level.INFO);
             }
         });
@@ -117,7 +117,7 @@ public class PrinterConfig {
     }
 
     public static void onInitialize() {
-        MaLiLib.logger.info("PrinterConfig.onInitialize");
+        MaLiLib.LOGGER.info("PrinterConfig.onInitialize");
         FREE_LOOK_TOGGLE.getKeybind().setCallback(new FreeLookKeyCallbackToggle(FREE_LOOK));
         PRINTER_PICK_BLOCK.getKeybind().setCallback(new PrinterPickBlockKeyCallback());
         InputEventHandler.getKeybindManager().registerKeybindProvider(PrinterInputHandler.getInstance());

@@ -19,16 +19,19 @@ val fabric_version: String by project
 val mod_version: String by project
 
 dependencies {
+//    implementation(project(":common"))
     minecraft("com.mojang:minecraft:${minecraft_version}")
     mappings("net.fabricmc:yarn:${yarn_mappings}:v2")
     annotationProcessor("io.github.llamalad7:mixinextras-fabric:0.2.2")?.let { implementation(it)?.let { include(it) } }
     modImplementation("net.fabricmc:fabric-loader:${loader_version}")
     modImplementation("net.fabricmc.fabric-api:fabric-api:${fabric_version}")
-    // Keep existing dependencies for malilib and litematica forks as they may still be compatible
-    modImplementation("com.github.sakura-ryoko:malilib:1.21-0.21.2-sakura.2")
-    modImplementation("com.github.sakura-ryoko:litematica:1.21-0.19.3-sakura.3")
+    //Replace Masa malilib with sakura-ryoko fork
+    //modImplementation("fi.dy.masa.malilib:malilib-fabric-${malilib_version}")
+    modImplementation("com.github.sakura-ryoko:malilib:1.21-0.21.6")
+    //Replace masa litematica with sakura-ryoko fork
+    //modImplementation("curse.maven:litematica-${litematica_projectid}:${litematica_fileid}")
+    modImplementation("com.github.sakura-ryoko:litematica:1.21-0.19.55")
 }
-
 
 repositories {
     maven("https://masa.dy.fi/maven")
