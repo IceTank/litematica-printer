@@ -28,7 +28,7 @@
     "fabric": "*",
     "minecraft": ">=1.21",
     "malilib": ">=0.21.6",
-    "litematica": "0.19.54",
+    "litematica": ">=0.19.54",
     "java": ">=21"
   },
   "custom": {
