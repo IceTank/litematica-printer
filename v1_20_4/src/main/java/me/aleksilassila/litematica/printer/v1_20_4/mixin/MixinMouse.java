@@ -5,6 +5,7 @@ import me.aleksilassila.litematica.printer.v1_20_4.LitematicaMixinMod;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
 import net.minecraft.util.math.MathHelper;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -24,8 +25,9 @@ public class MixinMouse {
     private MinecraftClient client;
 
     @Inject(method = "updateMouse",
-            at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/client/MinecraftClient;getTutorialManager()Lnet/minecraft/client/tutorial/TutorialManager;",
+            at = @At(value = "FIELD",
+                    target = "Lnet/minecraft/client/Mouse;cursorDeltaX:D",
+                    opcode = Opcodes.PUTFIELD,
                     shift = At.Shift.BEFORE
             ), cancellable = true
     )

@@ -37,14 +37,14 @@ public class AirPlaceAction extends InteractAction {
         ClientPlayNetworkHandler connection = mc.getNetworkHandler();
         ClientPlayerInteractionManager interactionManager = mc.interactionManager;
         if (mc.player == null || connection == null || interactionManager == null) return;
-        connection.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.SWAP_ITEM_WITH_OFFHAND, BlockPos.ORIGIN, Direction.UP));
+        connection.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.SWAP_ITEM_WITH_OFFHAND, BlockPos.ORIGIN, Direction.DOWN));
 
         Hand hand = Hand.OFF_HAND;
 
-        BlockHitResult hit = new BlockHitResult(Vec3d.ofCenter(pos), Direction.UP, pos, true);
+        BlockHitResult hit = new BlockHitResult(Vec3d.ofCenter(pos), Direction.DOWN, pos, true);
         interactionManager.interactBlock(mc.player, hand, hit);
         mc.player.swingHand(Hand.MAIN_HAND, false);
         connection.sendPacket(new HandSwingC2SPacket(hand));
-        connection.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.SWAP_ITEM_WITH_OFFHAND, BlockPos.ORIGIN, Direction.UP));
+        connection.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.SWAP_ITEM_WITH_OFFHAND, BlockPos.ORIGIN, Direction.DOWN));
     }
 }
