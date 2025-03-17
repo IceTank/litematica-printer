@@ -21,7 +21,7 @@ val archives_base_name: String by project
 val mod_version: String by project
 
 val buildAll = tasks.create("buildAll") {
-    dependsOn(":v1_21:build")
+    dependsOn(":v1_21_4:build")
     // This isn't working.... you still have to run each build individually
 /*    tasks.findByName(":v1_19_3:build")?.mustRunAfter(":v1_19_4:build")
     tasks.findByName(":v1_19:build")?.mustRunAfter(":v1_19_3:build")
