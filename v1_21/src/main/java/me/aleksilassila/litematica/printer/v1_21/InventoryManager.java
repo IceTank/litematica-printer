@@ -12,6 +12,7 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.screen.slot.SlotActionType;
@@ -37,6 +38,7 @@ public class InventoryManager {
     private final Deque<Integer> rollingSlots = new ArrayDeque<>();
     private final Deque<Integer> lastUsedSlots = new ArrayDeque<>();
     private static InventoryManager instance;
+
     private InventoryManager() {
         // Probably add a way to configure this
         for (int i = 0; i < 9; i++) {
@@ -87,11 +89,12 @@ public class InventoryManager {
 
     /**
      * Swaps the item from the inventory to the hotbar
+     *
      * @param item The item to pull from the inventory
      * @return True if the item could the swapped into the hotbar
      */
     private boolean swapToHotbar(ClientPlayerEntity player, Item item) {
-        if (getHotbarSlotWithItem(player, new ItemStack(item)) != -1) {
+        if (getHotbarSlotWithItem(player, new ItemStack(item)) != -1) { // Already in the hotbar dummy
             return true;
         }
         int slot = getBestInventorySlotWithItem(player, new ItemStack(item));
@@ -138,11 +141,19 @@ public class InventoryManager {
         }
     }
 
+    private void depositCursorStack() {
+        mc.getNetworkHandler().sendPacket(new CloseHandledScreenC2SPacket(mc.player.currentScreenHandler.syncId));
+//        if (!mc.player.playerScreenHandler.getCursorStack().isEmpty()) {
+//            mc.player.getInventory().offerOrDrop(mc.player.playerScreenHandler.getCursorStack());
+//            mc.player.playerScreenHandler.setCursorStack(ItemStack.EMPTY);
+//        }
+    }
+
     public static int findSlotWithBoxWithItem(PlayerInventory inventory, ItemStack stackReference, boolean lestFirst) {
         int bestCount = lestFirst ? Integer.MAX_VALUE : 0;
         int bestSlot = -1;
 
-        for(int slotNum = 0; slotNum < inventory.main.size(); slotNum += 1) {
+        for (int slotNum = 0; slotNum < inventory.main.size(); slotNum += 1) {
             ItemStack itemStack = inventory.getStack(slotNum);
             int count = shulkerBoxItemCount(itemStack, stackReference);
             if (lestFirst && count < bestCount && count > 0) {
@@ -176,11 +187,14 @@ public class InventoryManager {
         if (player == null || mc.interactionManager == null) {
             return false;
         }
+
+        // Swap logic start
         if (itemStack != null) {
             PlayerInventory inventory = player.getInventory();
 
             // This thing is straight from MinecraftClient#doItemPick()
             if (player.getAbilities().creativeMode) {
+                depositCursorStack();
                 inventory.addPickBlock(itemStack);
                 mc.interactionManager.clickCreativeStack(player.getStackInHand(Hand.MAIN_HAND), 36 + inventory.selectedSlot);
                 updateLastUsedSlot(inventory.selectedSlot);
@@ -188,9 +202,11 @@ public class InventoryManager {
             } else {
                 int hotbarSlot = getHotbarSlotWithItem(player, itemStack);
                 if (hotbarSlot == -1) {
+                    // Start equipping from inventory
                     if (delay > 0) {
                         return false;
                     }
+                    depositCursorStack();
                     if (swapToHotbar(mc.player, itemStack.getItem())) {
                         // If true the item should now be somewhere in the hotbar
                         hotbarSlot = getHotbarSlotWithItem(player, itemStack);
@@ -202,10 +218,12 @@ public class InventoryManager {
                             player.getInventory().selectedSlot = hotbarSlot;
                         }
                         updateLastUsedSlot(hotbarSlot);
-                        return true;
+                        return false;
                     }
                     return false;
                 } else {
+                    depositCursorStack();
+                    // Switch to hotbar slot
                     if (hotbarSlot != player.getInventory().selectedSlot) {
                         player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(hotbarSlot));
                         player.getInventory().selectedSlot = hotbarSlot;
@@ -229,6 +247,7 @@ public class InventoryManager {
     /**
      * Returns the next available slot for a new item. Returns the slot to the end of the queue after returning.
      * Range from 0-8
+     *
      * @return The next available slot
      */
     private int nextHotbarSlot() {
@@ -271,7 +290,8 @@ public class InventoryManager {
 
     /**
      * Returns the first slot with the given item. Returns -1 if no slot is found.
-     * @param player The player to check
+     *
+     * @param player    The player to check
      * @param itemStack The item to check for
      * @return The first slot with the given item
      */
@@ -282,7 +302,7 @@ public class InventoryManager {
 
         int lowestCount = 0;
         int lowestSlot = -1;
-        for(int i = 9; i < inventory.main.size(); ++i) {
+        for (int i = 9; i < inventory.main.size(); ++i) {
             if (!(inventory.main.get(i)).isEmpty() && ItemStack.areItemsAndComponentsEqual(itemStack, inventory.main.get(i))) {
                 if (inventory.main.get(i).getCount() < lowestCount || lowestSlot == -1) {
                     lowestCount = inventory.main.get(i).getCount();
@@ -294,6 +314,9 @@ public class InventoryManager {
         return lowestSlot;
     }
 
+    /**
+     * Return a number between 0-8 representing the hotbar slot with the given item.
+     */
     public int getHotbarSlotWithItem(ClientPlayerEntity player, ItemStack itemStack) {
         PlayerInventory inventory = player.getInventory();
 
@@ -302,7 +325,7 @@ public class InventoryManager {
         for (int i = 0; i < 9; ++i) {
             if (!inventory.main.get(i).isEmpty() && ItemStack.areItemsEqual(inventory.main.get(i), itemStack)) {
 //                if (hotbarSlots.get(i).ticksLocked == 0) {
-                    return i;
+                return i;
 //                }
             }
         }

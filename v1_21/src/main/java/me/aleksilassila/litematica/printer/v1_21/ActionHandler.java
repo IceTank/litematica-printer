@@ -37,6 +37,10 @@ public class ActionHandler {
                     System.out.println("Action (Pre) failed " + nextAction);
                 }
             }
+            if (!success) {
+                currentTickActions.clear();
+                break;
+            }
             nextAction = currentTickActions.poll();
         }
         Printer.inactivityCounter = 0;
@@ -56,6 +60,10 @@ public class ActionHandler {
                 } else {
                     System.out.println("Action (Post Tick) failed " + nextAction);
                 }
+            }
+            if (!success) {
+                previousTickActions.clear();
+                break;
             }
             nextAction = previousTickActions.poll();
         }
