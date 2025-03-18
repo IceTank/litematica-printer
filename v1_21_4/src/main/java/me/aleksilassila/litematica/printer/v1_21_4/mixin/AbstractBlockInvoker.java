@@ -1,4 +1,6 @@
-package me.aleksilassila.litematica.printer.v1_21_4.mixin;/*
+package me.aleksilassila.litematica.printer.v1_21_4.mixin;
+
+/*
  * @author IceTank
  * @since 17.03.2025
  */
@@ -9,6 +11,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldView;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(AbstractBlock.class)
