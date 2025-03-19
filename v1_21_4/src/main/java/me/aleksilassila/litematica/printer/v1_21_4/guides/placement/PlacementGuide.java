@@ -1,6 +1,7 @@
 package me.aleksilassila.litematica.printer.v1_21_4.guides.placement;
 
 import me.aleksilassila.litematica.printer.v1_21_4.LitematicaMixinMod;
+import me.aleksilassila.litematica.printer.v1_21_4.Printer;
 import me.aleksilassila.litematica.printer.v1_21_4.SchematicBlockState;
 import me.aleksilassila.litematica.printer.v1_21_4.actions.*;
 import me.aleksilassila.litematica.printer.v1_21_4.config.PrinterConfig;
@@ -141,11 +142,12 @@ abstract public class PlacementGuide extends Guide {
             }
         }
 
+        boolean shiftDown = mc.player.input.playerInput.sneak();
         actionChain.addImmediateAction(new PrepareLook(ctx));
-        if (ctx.shouldSneak) actionChain.addImmediateAction(new PresShift());
+        if (ctx.shouldSneak && !shiftDown) actionChain.addImmediateAction(new PresShift());
         actionChain.addNextTickAction(new PrepareAction(ctx));
         actionChain.addNextTickAction(new InteractActionImpl(ctx));
-        if (ctx.shouldSneak) actionChain.addNextTickAction(new ReleaseShiftAction());
+        if (ctx.shouldSneak && !shiftDown) actionChain.addNextTickAction(new ReleaseShiftAction());
         actions.add(actionChain);
 
         return actions;
