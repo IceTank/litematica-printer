@@ -142,8 +142,8 @@ abstract public class PlacementGuide extends Guide {
         }
 
         actionChain.addImmediateAction(new PrepareLook(ctx));
-        actionChain.addImmediateAction(new PrepareAction(ctx));
         if (ctx.shouldSneak) actionChain.addImmediateAction(new PresShift());
+        actionChain.addNextTickAction(new PrepareAction(ctx));
         actionChain.addNextTickAction(new InteractActionImpl(ctx));
         if (ctx.shouldSneak) actionChain.addNextTickAction(new ReleaseShiftAction());
         actions.add(actionChain);

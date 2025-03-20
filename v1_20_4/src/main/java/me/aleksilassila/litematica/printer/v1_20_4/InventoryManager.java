@@ -12,6 +12,7 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.screen.slot.SlotActionType;
@@ -93,7 +94,7 @@ public class InventoryManager {
      * @return True if the item could the swapped into the hotbar
      */
     private boolean swapToHotbar(ClientPlayerEntity player, Item item) {
-        if (getHotbarSlotWithItem(player, new ItemStack(item)) != -1) {
+        if (getHotbarSlotWithItem(player, new ItemStack(item)) != -1) { // Already in the hotbar dummy
             return true;
         }
         int slot = getBestInventorySlotWithItem(player, new ItemStack(item));
@@ -140,6 +141,14 @@ public class InventoryManager {
         }
     }
 
+    private void depositCursorStack() {
+        mc.getNetworkHandler().sendPacket(new CloseHandledScreenC2SPacket(mc.player.currentScreenHandler.syncId));
+//        if (!mc.player.playerScreenHandler.getCursorStack().isEmpty()) {
+//            mc.player.getInventory().offerOrDrop(mc.player.playerScreenHandler.getCursorStack());
+//            mc.player.playerScreenHandler.setCursorStack(ItemStack.EMPTY);
+//        }
+    }
+
     public static int findSlotWithBoxWithItem(PlayerInventory inventory, ItemStack stackReference, boolean lestFirst) {
         int bestCount = lestFirst ? Integer.MAX_VALUE : 0;
         int bestSlot = -1;
@@ -178,11 +187,14 @@ public class InventoryManager {
         if (player == null || mc.interactionManager == null) {
             return false;
         }
+
+        // Swap logic start
         if (itemStack != null) {
             PlayerInventory inventory = player.getInventory();
 
             // This thing is straight from MinecraftClient#doItemPick()
             if (player.getAbilities().creativeMode) {
+                depositCursorStack();
                 inventory.addPickBlock(itemStack);
                 mc.interactionManager.clickCreativeStack(player.getStackInHand(Hand.MAIN_HAND), 36 + inventory.selectedSlot);
                 updateLastUsedSlot(inventory.selectedSlot);
@@ -190,9 +202,11 @@ public class InventoryManager {
             } else {
                 int hotbarSlot = getHotbarSlotWithItem(player, itemStack);
                 if (hotbarSlot == -1) {
+                    // Start equipping from inventory
                     if (delay > 0) {
                         return false;
                     }
+                    depositCursorStack();
                     if (swapToHotbar(mc.player, itemStack.getItem())) {
                         // If true the item should now be somewhere in the hotbar
                         hotbarSlot = getHotbarSlotWithItem(player, itemStack);
@@ -204,10 +218,12 @@ public class InventoryManager {
                             player.getInventory().selectedSlot = hotbarSlot;
                         }
                         updateLastUsedSlot(hotbarSlot);
-                        return true;
+                        return false;
                     }
                     return false;
                 } else {
+                    depositCursorStack();
+                    // Switch to hotbar slot
                     if (hotbarSlot != player.getInventory().selectedSlot) {
                         player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(hotbarSlot));
                         player.getInventory().selectedSlot = hotbarSlot;
