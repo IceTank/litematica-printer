@@ -33,7 +33,8 @@ public class PrinterConfig {
 
     public static final ConfigInteger TICK_DELAY = new ConfigInteger("printerTickDelay", 0, 0, 100, "Tick delay between actions. 0 = no delay. Printer is limited to one action per tick.");
     public static final ConfigInteger BLOCK_TIMEOUT = new ConfigInteger("printerBlockTimeout", 10, 0, 100, "How many ticks to wait before trying to place the same block again.");
-    public static final ConfigBoolean ROTATE_PLAYER = new ConfigBoolean("printerRotatePlayer", true, "Rotate the player to face the block to place.");
+    public static final ConfigBoolean ROTATE_PLAYER = new ConfigBoolean("printerRotatePlayer", false, "Rotate the player to face the block to place.");
+    public static final ConfigBoolean PRINTER_GRIM_ROTATION = new ConfigBoolean("printerGrimRotate", true, "Allows you to place blocks anywhere while walking or using baritone.");
     public static final ConfigBoolean STOP_ON_MOVEMENT = new ConfigBoolean("printerStopOnMovement", false, "Stop the printer if the player velocity is to high.");
     public static final ConfigBoolean CARPET_MODE = new ConfigBoolean("printerCarpetMode", true, "Carpet mode. Checks more points on blocks for placement viability. This might be needed for very strict raycast anti cheat checks. Does nothing when raycast is disabled.");
     public static final ConfigInteger INVENTORY_DELAY = new ConfigInteger("printerInventoryDelay", 10, 0, 100, "The delay between each inventory action. 0 = no delay.");
@@ -69,6 +70,7 @@ public class PrinterConfig {
         list.add(TICK_DELAY);
         list.add(BLOCK_TIMEOUT);
         list.add(ROTATE_PLAYER);
+        list.add(PRINTER_GRIM_ROTATION);
         list.add(STOP_ON_MOVEMENT);
         list.add(CARPET_MODE);
         list.add(INVENTORY_DELAY);
