@@ -141,11 +141,12 @@ abstract public class PlacementGuide extends Guide {
             }
         }
 
+        boolean shiftDown = mc.player.input.sneaking;
         actionChain.addImmediateAction(new PrepareLook(ctx));
-        if (ctx.shouldSneak) actionChain.addImmediateAction(new PresShift());
+        if (ctx.shouldSneak && !shiftDown) actionChain.addImmediateAction(new PresShift());
         actionChain.addNextTickAction(new PrepareAction(ctx));
         actionChain.addNextTickAction(new InteractActionImpl(ctx));
-        if (ctx.shouldSneak) actionChain.addNextTickAction(new ReleaseShiftAction());
+        if (ctx.shouldSneak && !shiftDown) actionChain.addNextTickAction(new ReleaseShiftAction());
         actions.add(actionChain);
 
         return actions;
