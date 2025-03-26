@@ -1,6 +1,7 @@
 package me.aleksilassila.litematica.printer.v1_21;
 
 import me.aleksilassila.litematica.printer.v1_21.config.PrinterConfig;
+import me.aleksilassila.litematica.printer.v1_21.mixin.MixinAccessorClientPlayerEntity;
 import me.aleksilassila.litematica.printer.v1_21.mixin.MixinAccessorKeyBinding;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.CraftingScreen;
@@ -8,6 +9,8 @@ import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.network.packet.c2s.play.PlayerInputC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.Vec3d;
 
 public class MovementHandler {
@@ -62,6 +65,13 @@ public class MovementHandler {
 //            Printer.logger.info("No input direction");
             InputDirections.apply(InputDirections.NONE);
         }
+    }
+
+    public static void grimRotate(ClientPlayerEntity player, float yaw, float pitch) {
+        Vec3d playerPos = player.getPos();
+        mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.Full(playerPos.x, playerPos.y, playerPos.z, yaw, pitch, player.isOnGround()));
+        ((MixinAccessorClientPlayerEntity) mc.player).setLastYaw(yaw);
+        ((MixinAccessorClientPlayerEntity) mc.player).setLastPitch(pitch);
     }
 
     public void onDisable(ClientPlayerEntity player) {
