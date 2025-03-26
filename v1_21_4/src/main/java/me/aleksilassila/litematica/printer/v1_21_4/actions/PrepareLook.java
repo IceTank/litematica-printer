@@ -1,11 +1,11 @@
 package me.aleksilassila.litematica.printer.v1_21_4.actions;
 
 import me.aleksilassila.litematica.printer.v1_21_4.LitematicaMixinMod;
+import me.aleksilassila.litematica.printer.v1_21_4.MovementHandler;
 import me.aleksilassila.litematica.printer.v1_21_4.config.PrinterConfig;
 import me.aleksilassila.litematica.printer.v1_21_4.implementation.PrinterPlacementContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.Vec3d;
 
 import java.util.Optional;
@@ -47,8 +47,7 @@ public class PrepareLook extends Action {
             this.yaw = Optional.of(targetRot[0]);
             this.pitch = Optional.of(targetRot[1]);
             if (PrinterConfig.PRINTER_GRIM_ROTATION.getBooleanValue()) {
-                Vec3d playerPos = player.getPos();
-                mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.Full(playerPos.x, playerPos.y, playerPos.z, targetRot[0], targetRot[1], player.isOnGround(), player.horizontalCollision));
+                MovementHandler.grimRotate(player, targetRot[0], targetRot[1]);
             }
         } else {
             float yaw = player.getYaw();
@@ -60,8 +59,7 @@ public class PrepareLook extends Action {
             this.yaw = Optional.of(yaw);
             this.pitch = Optional.of(pitch);
             if (PrinterConfig.PRINTER_GRIM_ROTATION.getBooleanValue()) {
-                Vec3d playerPos = player.getPos();
-                mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.Full(playerPos.x, playerPos.y, playerPos.z, yaw, pitch, player.isOnGround(), player.horizontalCollision));
+                MovementHandler.grimRotate(player, yaw, pitch);
             }
         }
         return true;

@@ -1,6 +1,7 @@
 package me.aleksilassila.litematica.printer.v1_21_4;
 
 import me.aleksilassila.litematica.printer.v1_21_4.config.PrinterConfig;
+import me.aleksilassila.litematica.printer.v1_21_4.mixin.MixinAccessorClientPlayerEntity;
 import me.aleksilassila.litematica.printer.v1_21_4.mixin.MixinAccessorKeyBinding;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.CraftingScreen;
@@ -8,6 +9,8 @@ import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.network.packet.c2s.play.PlayerInputC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.Vec3d;
 
 public class MovementHandler {
@@ -64,6 +67,14 @@ public class MovementHandler {
         }
     }
 
+    public static void grimRotate(ClientPlayerEntity player, float yaw, float pitch) {
+        Vec3d playerPos = player.getPos();
+        mc.getNetworkHandler().sendPacket(new PlayerInputC2SPacket(player.input.playerInput));
+        mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.Full(playerPos.x, playerPos.y, playerPos.z, yaw, pitch, player.isOnGround(), player.horizontalCollision));
+        ((MixinAccessorClientPlayerEntity) mc.player).setLastYaw(yaw);
+        ((MixinAccessorClientPlayerEntity) mc.player).setLastPitch(pitch);
+    }
+
     public void onDisable(ClientPlayerEntity player) {
         disableNextTick = true;
     }
@@ -79,6 +90,7 @@ public class MovementHandler {
         BACK_RIGHT(225),
         NONE(-1);
         private final float yaw;
+
         InputDirections(float i) {
             this.yaw = i;
         }
@@ -99,6 +111,7 @@ public class MovementHandler {
 
         /**
          * Returns a unit vector in the direction of the input direction
+         *
          * @return a unit vector in the direction of the input direction
          */
         public Vec3d getVec3d() {
