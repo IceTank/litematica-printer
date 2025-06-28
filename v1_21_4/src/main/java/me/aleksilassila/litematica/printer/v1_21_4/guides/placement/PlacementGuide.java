@@ -132,8 +132,9 @@ abstract public class PlacementGuide extends Guide {
         ActionChain actionChain = new ActionChain();
 
         if (ctx.isAirPlace) {
-            actionChain.addImmediateAction(new PrepareAction(ctx));
-            actionChain.addImmediateAction(new AirPlaceAction(ctx));
+            actionChain.addImmediateAction(new PrepareLook(ctx));
+            actionChain.addNextTickAction(new PrepareAction(ctx));
+            actionChain.addNextTickAction(new AirPlaceAction(ctx));
             actions.add(actionChain);
             return actions;
         } else {
