@@ -1,17 +1,21 @@
 package me.aleksilassila.litematica.printer.v1_21_4.guides.placement;
 
+import fi.dy.masa.litematica.world.SchematicWorldHandler;
+import fi.dy.masa.litematica.world.WorldSchematic;
 import me.aleksilassila.litematica.printer.v1_21_4.LitematicaMixinMod;
 import me.aleksilassila.litematica.printer.v1_21_4.Printer;
 import me.aleksilassila.litematica.printer.v1_21_4.SchematicBlockState;
 import me.aleksilassila.litematica.printer.v1_21_4.config.PrinterConfig;
 import me.aleksilassila.litematica.printer.v1_21_4.implementation.PrinterPlacementContext;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.ChestBlock;
 import net.minecraft.block.SlabBlock;
 import net.minecraft.block.enums.ChestType;
 import net.minecraft.block.enums.SlabType;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.state.property.Properties;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
@@ -250,7 +254,7 @@ public class GeneralPlacementGuide extends PlacementGuide {
                                 .orElse(targetState.getBlock())
                                 .getPlacementState(rayTraceContext);
 
-                        if (resultState != null && (statesEqual(resultState, targetState) || correctChestPlacement(targetState, resultState))) {
+                        if (resultState != null && correctObserverPlacement(targetState, resultState) && (statesEqual(resultState, targetState) || correctChestPlacement(targetState, resultState))) {
                             contextCache = rayTraceContext;
                             return rayTraceContext;
                         }
@@ -264,7 +268,7 @@ public class GeneralPlacementGuide extends PlacementGuide {
                             .orElse(targetState.getBlock())
                             .getPlacementState(context); // FIXME torch shift clicks another torch and getPlacementState is the clicked block, which is true
 
-                    if (result != null && (statesEqual(result, targetState) || correctChestPlacement(targetState, result))) {
+                    if (result != null && correctObserverPlacement(targetState, result) && (statesEqual(result, targetState) || correctChestPlacement(targetState, result))) {
                         contextCache = context;
                         return context;
                     }
@@ -342,6 +346,32 @@ public class GeneralPlacementGuide extends PlacementGuide {
         }
 
         return false;
+    }
+
+    /**
+     * Returns true if the observer is placed correctly or if the config printerPlaceObserversLast is set to false
+     * @param targetState the target state of the block being placed
+     * @param result the result state of the block being placed
+     * @return true if the observer is placed correctly, false otherwise
+     */
+    private boolean correctObserverPlacement(BlockState targetState, BlockState result) {
+        if (!PrinterConfig.PRINTER_PLACE_OBSERVERS_LAST.getBooleanValue()) return true; // If the config is set to place observers last, we don't need to check this
+
+        if (result.getBlock() != Blocks.OBSERVER) return false;
+        if (targetState.getBlock() != Blocks.OBSERVER) return false;
+
+        Direction facing = result.get(Properties.FACING);
+        if (facing == null) return false;
+
+        WorldSchematic schematicWorld = SchematicWorldHandler.getSchematicWorld();
+        if (schematicWorld == null) return false;
+        if (mc.world == null) return false;
+
+        if (schematicWorld.getBlockState(state.blockPos.offset(facing)).isAir()) {
+            return true;
+        } else {
+            return !mc.world.getBlockState(state.blockPos.offset(facing)).isAir();
+        }
     }
 
     private boolean canSeeBlockFace(ClientPlayerEntity player, BlockHitResult hitResult) {

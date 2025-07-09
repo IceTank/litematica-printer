@@ -64,6 +64,7 @@ public class PrinterConfig {
     public static final ConfigInteger PRINTER_MIN_INACTIVE_TIME_AIR_PLACE = new ConfigInteger("printerMinInactiveTimeAirPlace", 0, "Minimum time in ticks to wait before placing a block in the air.");
     public static final ConfigString PRINTER_HOTBAR_SLOTS = new ConfigString("printerHotbarSlots", "3,4,5,6,7,8,9", "Hotbar slots to use for the printer. Numbers from 1-9 separated by commas.");
     public static final ConfigBoolean AUTO_CONVERT_SCHEMATIC_TO_LITEMATIC_ON_LOAD = new ConfigBoolean("autoConvertSchematicToLitematicOnLoad", false, "Automatically convert schematic files to litematic files when loading them.");
+    public static final ConfigBoolean PRINTER_PLACE_OBSERVERS_LAST = new ConfigBoolean("printerPlaceObserversLast", false, "Only place observers when the block infront of them in the schematic is either air or already placed in the world.");
 
     public ImmutableList<IConfigBase> getOptions() {
         List<IConfigBase> list = new java.util.ArrayList<>(Configs.Generic.OPTIONS);
@@ -100,6 +101,7 @@ public class PrinterConfig {
         list.add(PRINTER_MIN_INACTIVE_TIME_AIR_PLACE);
         list.add(PRINTER_HOTBAR_SLOTS);
         list.add(AUTO_CONVERT_SCHEMATIC_TO_LITEMATIC_ON_LOAD);
+        list.add(PRINTER_PLACE_OBSERVERS_LAST);
 
         PRINTER_DEBUG_LOG.setValueChangeCallback(config -> {
             if (config.getBooleanValue()) {
