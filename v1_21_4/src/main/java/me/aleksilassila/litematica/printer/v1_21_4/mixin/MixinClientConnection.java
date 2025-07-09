@@ -48,8 +48,8 @@ public class MixinClientConnection {
         if (PrinterConfig.PRINTER_SUPER_CHINESE_GHOST_ITEM_FIX.getBooleanValue()) {
             if (packet instanceof ScreenHandlerSlotUpdateS2CPacket packet1) {
                 // Looks like faulty packet is always on syncId = 0
-                if (packet1.getSyncId() == 0) {
-                    if (mc.player != null) {
+                if (packet1.getSyncId() == 0 && mc.player != null) {
+                    if (packet1.getSlot() >= PlayerScreenHandler.HOTBAR_START || packet1.getSlot() < PlayerScreenHandler.HOTBAR_END) {
                         // Only cancel updates to block items. Some blocks might not be in the USABLE_SLOTS list but still get used for placing
                         if (mc.player.playerScreenHandler.getSlot(packet1.getSlot()).getStack().getItem() instanceof BlockItem) {
                             callback.cancel();
