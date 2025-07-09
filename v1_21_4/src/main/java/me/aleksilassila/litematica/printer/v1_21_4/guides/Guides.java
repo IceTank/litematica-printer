@@ -35,7 +35,8 @@ public class Guides {
                 BambooBlock.class, CactusBlock.class, SaplingBlock.class, ScaffoldingBlock.class, PointedDripstoneBlock.class,
                 HorizontalConnectingBlock.class, DoorBlock.class, TrapdoorBlock.class, FenceGateBlock.class, ChestBlock.class,
                 SnowBlock.class, SeaPickleBlock.class, CandleBlock.class, LeverBlock.class, EndPortalFrameBlock.class,
-                NoteBlock.class, CampfireBlock.class, PoweredRailBlock.class, LeavesBlock.class, TripwireHookBlock.class);
+                NoteBlock.class, CampfireBlock.class, PoweredRailBlock.class, LeavesBlock.class, TripwireHookBlock.class,
+                PistonBlock.class);
         registerGuide(FallingBlockGuide.class, FallingBlock.class);
         registerGuide(BlockIndifferentGuesserGuide.class, BambooBlock.class, BigDripleafStemBlock.class, BigDripleafBlock.class,
                 TwistingVinesPlantBlock.class, TripwireBlock.class, MushroomBlock.class, MultifaceGrowthBlock.class);

@@ -38,7 +38,7 @@ public class PropertySpecificGuesserGuide extends GuesserGuide {
             Properties.ATTACHED,
             Properties.NOTE,
             Properties.INSTRUMENT,
-
+            Properties.EXTENDED
     };
 
     public PropertySpecificGuesserGuide(SchematicBlockState state) {
