@@ -298,17 +298,29 @@ public class GeneralPlacementGuide extends PlacementGuide {
 
         if (slot == -1) return null;
 
-        if (Printer.inactivityCounter < PrinterConfig.PRINTER_MIN_INACTIVE_TIME_AIR_PLACE.getIntegerValue()) {
+        if (Printer.inactivityCounter <= PrinterConfig.PRINTER_MIN_INACTIVE_TIME_AIR_PLACE.getIntegerValue()) {
             return null;
         }
 
+        // Check if we can place without rotating
+        // Direction in BlockHitResult should not matter as placement result should come from internal player rotation
+        // Maybe does matter for slabs? But then again airplace always places DOWN so idk
+        BlockHitResult noRotateHitResult = new BlockHitResult(Vec3d.ofCenter(state.blockPos), Direction.UP, state.blockPos, true);
+        PrinterPlacementContext noRotateContext = new PrinterPlacementContext(player, noRotateHitResult, requiredItem, slot, null, false);
+        BlockState noRotateResult = getRequiredItemAsBlock(player)
+                .orElse(targetState.getBlock())
+                .getPlacementState(noRotateContext); // FIXME torch shift clicks another torch and getPlacementState is the clicked block, which is true
+
+        if (noRotateResult != null && correctObserverPlacement(targetState, noRotateResult) && (statesEqual(noRotateResult, targetState))) {
+            contextCache = noRotateContext;
+            noRotateContext.isAirPlace = true;
+            return noRotateContext;
+        }
+
         for (Direction lookDirection : directionsToTry) {
-//            for (Direction side : directionsToTry) {
             final Direction side = Direction.UP; // Airplace only works for UP for now
             BlockPos neighborPos = state.blockPos.offset(side);
 
-//                Vec3d hitVec = Vec3d.ofCenter(state.blockPos)
-//                        .add(Vec3d.of(side.getVector()).multiply(0.5));
             Vec3d hitVec = Vec3d.ofCenter(state.blockPos);
 
             BlockHitResult hitResult = new BlockHitResult(hitVec, side.getOpposite(), neighborPos, false);
@@ -317,7 +329,7 @@ public class GeneralPlacementGuide extends PlacementGuide {
                     .orElse(targetState.getBlock())
                     .getPlacementState(context); // FIXME torch shift clicks another torch and getPlacementState is the clicked block, which is true
 
-            if (result != null && (statesEqual(result, targetState))) {
+            if (result != null && correctObserverPlacement(targetState, result) && (statesEqual(result, targetState))) {
                 contextCache = context;
                 context.isAirPlace = true;
                 return context;
@@ -357,8 +369,8 @@ public class GeneralPlacementGuide extends PlacementGuide {
     private boolean correctObserverPlacement(BlockState targetState, BlockState result) {
         if (!PrinterConfig.PRINTER_PLACE_OBSERVERS_LAST.getBooleanValue()) return true; // If the config is set to place observers last, we don't need to check this
 
-        if (result.getBlock() != Blocks.OBSERVER) return false;
-        if (targetState.getBlock() != Blocks.OBSERVER) return false;
+        if (result.getBlock() != Blocks.OBSERVER) return true;
+        if (targetState.getBlock() != Blocks.OBSERVER) return true;
 
         Direction facing = result.get(Properties.FACING);
         if (facing == null) return false;

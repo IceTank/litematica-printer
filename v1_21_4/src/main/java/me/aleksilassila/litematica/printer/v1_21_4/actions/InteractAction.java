@@ -8,6 +8,7 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.math.BlockPos;
 
 abstract public class InteractAction extends Action {
     public final PrinterPlacementContext context;
@@ -24,11 +25,8 @@ abstract public class InteractAction extends Action {
 
         if (LitematicaMixinMod.DEBUG)
             System.out.println("InteractAction.send: Blockpos: " + context.getBlockPos() + " Side: " + context.getSide() + " HitPos: " + context.getHitPos());
-        if (context.isAirPlace) {
-            Printer.addTimeout(context.getBlockPos().offset(context.getSide()));
-        } else {
-            Printer.addTimeout(context.getBlockPos());
-        }
+        BlockPos pos = context.hitResult.isInsideBlock() ? context.hitResult.getBlockPos() : context.hitResult.getBlockPos().offset(context.hitResult.getSide());
+        Printer.addTimeout(pos);
         return true;
     }
 

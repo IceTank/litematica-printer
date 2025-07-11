@@ -28,12 +28,13 @@ public class AirPlaceAction extends InteractAction {
 
     @Override
     protected ActionResult interact(MinecraftClient client, ClientPlayerEntity player, Hand hand, BlockHitResult hitResult) {
-        if (!mc.world.getBlockState(hitResult.getBlockPos().offset(hitResult.getSide())).isAir()) {
+        BlockPos pos = hitResult.isInsideBlock() ? hitResult.getBlockPos() : hitResult.getBlockPos().offset(hitResult.getSide());
+        if (!mc.world.getBlockState(pos).isAir()) {
             if (PrinterConfig.PRINTER_DEBUG_LOG.getBooleanValue()) System.out.println("InteractActionImpl.interact: block is not air");
             return ActionResult.FAIL;
         }
         if (PrinterConfig.PRINTER_DEBUG_LOG.getBooleanValue()) System.out.println("InteractActionImpl.interact: attempting to air place block");
-        airPlace(hitResult.getBlockPos().offset(hitResult.getSide()));
+        airPlace(pos);
         return ActionResult.PASS;
     }
 
