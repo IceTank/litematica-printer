@@ -2,6 +2,7 @@ package me.aleksilassila.litematica.printer.v1_21_4.actions;
 
 import me.aleksilassila.litematica.printer.v1_21_4.LitematicaMixinMod;
 import me.aleksilassila.litematica.printer.v1_21_4.MovementHandler;
+import me.aleksilassila.litematica.printer.v1_21_4.Printer;
 import me.aleksilassila.litematica.printer.v1_21_4.config.PrinterConfig;
 import me.aleksilassila.litematica.printer.v1_21_4.implementation.PrinterPlacementContext;
 import net.minecraft.client.MinecraftClient;
@@ -64,6 +65,9 @@ public class PrepareLook extends Action {
                 this.yaw = Optional.of(targetRot[0]);
                 this.pitch = Optional.of(targetRot[1]);
 
+                if (PrinterConfig.PRINTER_DEBUG_LOG.getBooleanValue())
+                    Printer.logger.info("Sending yaw for modified airplace yaw: " + yaw + ", pitch: " + pitch);
+
                 if (PrinterConfig.PRINTER_GRIM_ROTATION.getBooleanValue()) {
                     MovementHandler.grimRotate(player, yaw.get(), pitch.get());
                 } else if (PrinterConfig.ROTATE_PLAYER.getBooleanValue()) {
@@ -72,6 +76,7 @@ public class PrepareLook extends Action {
                     mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(
                             yaw.get(), pitch.get(), player.isOnGround(), player.horizontalCollision));
                 }
+                return true;
             }
         }
         if (context.canStealth) {

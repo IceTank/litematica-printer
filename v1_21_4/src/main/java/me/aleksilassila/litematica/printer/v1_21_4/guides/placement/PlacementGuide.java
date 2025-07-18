@@ -133,7 +133,11 @@ abstract public class PlacementGuide extends Guide {
 
         if (ctx.isAirPlace) {
             if (ctx.lookDirection != null) {
-                actionChain.addImmediateAction(new PrepareLook(ctx));
+                if (PrinterConfig.PRINTER_GRIM_ROTATION.getBooleanValue()) {
+                    actionChain.addNextTickAction(new PrepareLook(ctx));
+                } else {
+                    actionChain.addImmediateAction(new PrepareLook(ctx));
+                }
             }
             actionChain.addNextTickAction(new PrepareAction(ctx));
             actionChain.addNextTickAction(new AirPlaceAction(ctx));
