@@ -3,6 +3,7 @@ package me.aleksilassila.litematica.printer.v1_21_4.guides;
 import me.aleksilassila.litematica.printer.v1_21_4.SchematicBlockState;
 import me.aleksilassila.litematica.printer.v1_21_4.actions.Action;
 import me.aleksilassila.litematica.printer.v1_21_4.config.PrinterConfig;
+import me.aleksilassila.litematica.printer.v1_21_4.guides.placement.PropertySpecificGuesserGuide;
 import me.aleksilassila.litematica.printer.v1_21_4.implementation.BlockHelperImpl;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.CoralBlock;
@@ -118,18 +119,14 @@ abstract public class Guide extends BlockHelperImpl {
     }
 
     /**
-     * Returns true if
+     * Returns true if the two states are equal, ignoring properties that are not relevant
      */
     protected boolean statesEqual(BlockState state1, BlockState state2) {
         if (PrinterConfig.PRINTER_IGNORE_ROTATION.getBooleanValue()) {
-            return statesEqualIgnoreProperties(state1, state2, Properties.ROTATION, Properties.HORIZONTAL_FACING, Properties.AXIS, Properties.HORIZONTAL_AXIS);
+            return statesEqualIgnoreProperties(state1, state2, PropertySpecificGuesserGuide.rotationProperties);
         } else {
             return statesEqualIgnoreProperties(state1, state2);
         }
-    }
-
-    protected boolean stateEqualIgnoreRotation(BlockState state1, BlockState state2) {
-        return statesEqualIgnoreProperties(state1, state2, Properties.ROTATION, Properties.HORIZONTAL_FACING);
     }
 
     public boolean skipOtherGuides() {
