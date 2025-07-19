@@ -45,6 +45,7 @@ public class PropertySpecificGuesserGuide extends GuesserGuide {
             Properties.EAST_WALL_SHAPE,
             Properties.NORTH_WALL_SHAPE,
             Properties.SOUTH_WALL_SHAPE,
+            Properties.ENABLED
     };
 
     public static Property<?>[] rotationProperties = new Property[]{
