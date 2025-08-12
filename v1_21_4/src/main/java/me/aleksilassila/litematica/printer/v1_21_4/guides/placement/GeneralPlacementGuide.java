@@ -302,37 +302,62 @@ public class GeneralPlacementGuide extends PlacementGuide {
             return null;
         }
 
-        // Check if we can place without rotating
-        // Direction in BlockHitResult should not matter as placement result should come from internal player rotation
-        // Maybe does matter for slabs? But then again airplace always places DOWN so idk
-        BlockHitResult noRotateHitResult = new BlockHitResult(Vec3d.ofCenter(state.blockPos), Direction.UP, state.blockPos, true);
-        PrinterPlacementContext noRotateContext = new PrinterPlacementContext(player, noRotateHitResult, requiredItem, slot, null, false);
-        BlockState noRotateResult = getRequiredItemAsBlock(player)
-                .orElse(targetState.getBlock())
-                .getPlacementState(noRotateContext); // FIXME torch shift clicks another torch and getPlacementState is the clicked block, which is true
+        // We'll brute force: sides (including horizontal) + hit positions inside the target block volume
+        // to emulate realistic clicks that yield correct orientation for special blocks (hoppers, froglights, basalt, slabs).
 
-        if (noRotateResult != null && correctObserverPlacement(targetState, noRotateResult) && (statesEqual(noRotateResult, targetState))) {
-            contextCache = noRotateContext;
-            noRotateContext.isAirPlace = true;
-            return noRotateContext;
+        // Candidate sides to emulate a supporting face. For airplace we pretend there is a block on that side.
+        Direction[] candidateSides = new Direction[]{
+                Direction.UP, Direction.DOWN,
+                Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST
+        };
+
+        // Hit offsets inside block relative to its min corner (0..1). Include lower y (<0.5) for bottom slabs, and center variations.
+        double[] ySamples = new double[]{0.25, 0.5, 0.75};
+        double[] xzSamples = new double[]{0.25, 0.5, 0.75};
+
+        // First quick attempt: original center (UP side) (fast path)
+        {
+            BlockHitResult hr = new BlockHitResult(Vec3d.ofCenter(state.blockPos), Direction.UP, state.blockPos, true);
+            PrinterPlacementContext quick = new PrinterPlacementContext(player, hr, requiredItem, slot, null, false);
+            BlockState res = getRequiredItemAsBlock(player).orElse(targetState.getBlock()).getPlacementState(quick);
+            if (res != null && correctObserverPlacement(targetState, res) && statesEqual(res, targetState)) {
+                contextCache = quick; quick.isAirPlace = true; return quick; }
         }
 
         for (Direction lookDirection : directionsToTry) {
-            final Direction side = Direction.UP; // Airplace only works for UP for now
-            BlockPos neighborPos = state.blockPos.offset(side);
+            for (Direction side : candidateSides) {
+                // Neighbor position (imaginary supporting block). For DOWN side we offset below, etc.
+                BlockPos neighborPos = state.blockPos.offset(side);
 
-            Vec3d hitVec = Vec3d.ofCenter(state.blockPos);
+                // For each sample point on the face or interior adjust the hit vector.
+                for (double y : ySamples) {
+                    for (double x : xzSamples) {
+                        for (double z : xzSamples) {
+                            // Start with raw interior sample
+                            Vec3d sample = new Vec3d(x, y, z);
+                            Vec3d hitVec = Vec3d.of(state.blockPos).add(sample);
 
-            BlockHitResult hitResult = new BlockHitResult(hitVec, side.getOpposite(), neighborPos, false);
-            PrinterPlacementContext context = new PrinterPlacementContext(player, hitResult, requiredItem, slot, lookDirection, false);
-            BlockState result = getRequiredItemAsBlock(player)
-                    .orElse(targetState.getBlock())
-                    .getPlacementState(context); // FIXME torch shift clicks another torch and getPlacementState is the clicked block, which is true
+                            // Ensure the hitVec lies on the correct face for the side: project coordinate component to face plane center
+                            switch (side) {
+                                case UP: hitVec = new Vec3d(hitVec.x, state.blockPos.getY() + 1 - 1e-4, hitVec.z); break;
+                                case DOWN: hitVec = new Vec3d(hitVec.x, state.blockPos.getY() + 1e-4, hitVec.z); break;
+                                case NORTH: hitVec = new Vec3d(hitVec.x, hitVec.y, state.blockPos.getZ() + 1e-4); break;
+                                case SOUTH: hitVec = new Vec3d(hitVec.x, hitVec.y, state.blockPos.getZ() + 1 - 1e-4); break;
+                                case WEST: hitVec = new Vec3d(state.blockPos.getX() + 1e-4, hitVec.y, hitVec.z); break;
+                                case EAST: hitVec = new Vec3d(state.blockPos.getX() + 1 - 1e-4, hitVec.y, hitVec.z); break;
+                            }
 
-            if (result != null && correctObserverPlacement(targetState, result) && (statesEqual(result, targetState))) {
-                contextCache = context;
-                context.isAirPlace = true;
-                return context;
+                            BlockHitResult hitResult = new BlockHitResult(hitVec, side.getOpposite(), neighborPos, false);
+                            PrinterPlacementContext context = new PrinterPlacementContext(player, hitResult, requiredItem, slot, lookDirection, false);
+                            BlockState result = getRequiredItemAsBlock(player)
+                                    .orElse(targetState.getBlock())
+                                    .getPlacementState(context);
+                            if (result != null && correctObserverPlacement(targetState, result) && statesEqual(result, targetState)) {
+                                contextCache = context; context.isAirPlace = true; return context;
+                            }
+                        }
+                    }
+                }
             }
         }
 

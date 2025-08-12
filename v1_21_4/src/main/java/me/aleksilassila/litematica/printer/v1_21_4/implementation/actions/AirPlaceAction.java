@@ -49,9 +49,17 @@ public class AirPlaceAction extends InteractAction {
         connection.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.SWAP_ITEM_WITH_OFFHAND, BlockPos.ORIGIN, Direction.DOWN));
 
         Hand hand = Hand.OFF_HAND;
-
-        BlockHitResult hit = new BlockHitResult(Vec3d.ofCenter(pos), Direction.DOWN, pos, true);
-        interactionManager.interactBlock(mc.player, hand, hit);
+        // Build a synthetic hit result anchored on the target block position (inside-block) but preserving
+        // the sampled side & hit vector for orientation. This avoids accidentally clicking a real neighbor
+        // and placing a block one block ahead (issue seen with hoppers & slabs).
+        BlockHitResult original = this.context.hitResult;
+        BlockHitResult placeHit;
+        if (original != null) {
+            placeHit = new BlockHitResult(original.getPos(), original.getSide(), pos, true);
+        } else {
+            placeHit = new BlockHitResult(Vec3d.ofCenter(pos), Direction.DOWN, pos, true);
+        }
+        interactionManager.interactBlock(mc.player, hand, placeHit);
         mc.player.swingHand(Hand.MAIN_HAND, false);
         connection.sendPacket(new HandSwingC2SPacket(hand));
         connection.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.SWAP_ITEM_WITH_OFFHAND, BlockPos.ORIGIN, Direction.DOWN));
