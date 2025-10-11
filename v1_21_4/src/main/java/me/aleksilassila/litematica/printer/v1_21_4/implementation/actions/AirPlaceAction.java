@@ -1,8 +1,11 @@
 package me.aleksilassila.litematica.printer.v1_21_4.implementation.actions;
 
+import me.aleksilassila.litematica.printer.v1_21_4.LitematicaMixinMod;
 import me.aleksilassila.litematica.printer.v1_21_4.actions.InteractAction;
 import me.aleksilassila.litematica.printer.v1_21_4.config.PrinterConfig;
 import me.aleksilassila.litematica.printer.v1_21_4.implementation.PrinterPlacementContext;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.FluidBlock;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -29,8 +32,16 @@ public class AirPlaceAction extends InteractAction {
     @Override
     protected ActionResult interact(MinecraftClient client, ClientPlayerEntity player, Hand hand, BlockHitResult hitResult) {
         BlockPos pos = hitResult.isInsideBlock() ? hitResult.getBlockPos() : hitResult.getBlockPos().offset(hitResult.getSide());
-        if (!mc.world.getBlockState(pos).isAir()) {
-            if (PrinterConfig.PRINTER_DEBUG_LOG.getBooleanValue()) System.out.println("InteractActionImpl.interact: block is not air");
+        BlockState currentState = mc.world.getBlockState(pos);
+        
+        // Allow placement in air or in fluids when REPLACE_FLUIDS_SOURCE_BLOCKS is enabled
+        boolean canPlace = currentState.isAir() || 
+                          (LitematicaMixinMod.REPLACE_FLUIDS_SOURCE_BLOCKS.getBooleanValue() && 
+                           currentState.getBlock() instanceof FluidBlock);
+        
+        if (!canPlace) {
+            if (PrinterConfig.PRINTER_DEBUG_LOG.getBooleanValue()) 
+                System.out.println("InteractActionImpl.interact: block is not air and fluid replacement is disabled");
             return ActionResult.FAIL;
         }
         if (PrinterConfig.PRINTER_DEBUG_LOG.getBooleanValue()) System.out.println("InteractActionImpl.interact: attempting to air place block");
