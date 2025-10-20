@@ -241,7 +241,7 @@ public class InventoryManager {
     private void addPickBlock(PlayerInventory inv, ItemStack stack) {
         int slot = inv.getSlotWithStack(stack);
 
-        if (slot >= 0 && slot <= 9) {
+        if (slot >= 0 && slot < 9) {
             inv.selectedSlot = slot;
         } else {
             if (slot == -1) {
