@@ -122,10 +122,22 @@ abstract public class Guide extends BlockHelperImpl {
      * Returns true if the two states are equal, ignoring properties that are not relevant
      */
     protected boolean statesEqual(BlockState state1, BlockState state2) {
+        // Always ignore redstone-volatile properties that can differ transiently in-world
+        // to avoid blocking placement under redstone power.
+        Property<?>[] redstoneVolatile = new Property<?>[] {
+                Properties.POWERED, // many blocks (buttons, rails, etc.)
+                Properties.TRIGGERED, // dispensers/dropper
+                Properties.ENABLED // hoppers
+        };
+
         if (PrinterConfig.PRINTER_IGNORE_ROTATION.getBooleanValue()) {
-            return statesEqualIgnoreProperties(state1, state2, PropertySpecificGuesserGuide.rotationProperties);
+            // Merge rotation ignore with redstone-volatile ignores
+            Property<?>[] merged = new Property<?>[PropertySpecificGuesserGuide.rotationProperties.length + redstoneVolatile.length];
+            System.arraycopy(PropertySpecificGuesserGuide.rotationProperties, 0, merged, 0, PropertySpecificGuesserGuide.rotationProperties.length);
+            System.arraycopy(redstoneVolatile, 0, merged, PropertySpecificGuesserGuide.rotationProperties.length, redstoneVolatile.length);
+            return statesEqualIgnoreProperties(state1, state2, merged);
         } else {
-            return statesEqualIgnoreProperties(state1, state2);
+            return statesEqualIgnoreProperties(state1, state2, redstoneVolatile);
         }
     }
 
