@@ -5,7 +5,6 @@ import net.minecraft.block.*;
 import net.minecraft.block.enums.BlockHalf;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -30,18 +29,6 @@ public class FacingBlockGuide extends SlabGuide {
         }
 
         return Arrays.stream(Direction.values()).toList();
-    }
-
-    protected Vec3d[] getPossibleHitVecs() {
-        Vec3d[] parentVecs = super.getPossibleHitVecs();
-        Block block = state.targetState.getBlock();
-        if (!(block instanceof StairsBlock)) {
-            return parentVecs;
-        }
-
-        Direction half = getRequiredHalf(state);
-
-        return Arrays.stream(parentVecs).filter(vec -> half == Direction.DOWN ? vec.y <= 0 : vec.y > 0).toArray(Vec3d[]::new);
     }
 
     @Override

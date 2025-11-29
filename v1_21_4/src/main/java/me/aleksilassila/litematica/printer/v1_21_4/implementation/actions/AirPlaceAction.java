@@ -2,7 +2,6 @@ package me.aleksilassila.litematica.printer.v1_21_4.implementation.actions;
 
 import me.aleksilassila.litematica.printer.v1_21_4.LitematicaMixinMod;
 import me.aleksilassila.litematica.printer.v1_21_4.actions.InteractAction;
-import me.aleksilassila.litematica.printer.v1_21_4.config.PrinterConfig;
 import me.aleksilassila.litematica.printer.v1_21_4.implementation.PrinterPlacementContext;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.FluidBlock;
@@ -21,7 +20,6 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
 
 public class AirPlaceAction extends InteractAction {
     private final MinecraftClient mc = MinecraftClient.getInstance();
@@ -33,18 +31,15 @@ public class AirPlaceAction extends InteractAction {
     protected ActionResult interact(MinecraftClient client, ClientPlayerEntity player, Hand hand, BlockHitResult hitResult) {
         BlockPos pos = hitResult.isInsideBlock() ? hitResult.getBlockPos() : hitResult.getBlockPos().offset(hitResult.getSide());
         BlockState currentState = mc.world.getBlockState(pos);
-        
+
         // Allow placement in air or in fluids when REPLACE_FLUIDS_SOURCE_BLOCKS is enabled
-        boolean canPlace = currentState.isAir() || 
-                          (LitematicaMixinMod.REPLACE_FLUIDS_SOURCE_BLOCKS.getBooleanValue() && 
+        boolean canPlace = currentState.isAir() ||
+                          (LitematicaMixinMod.REPLACE_FLUIDS_SOURCE_BLOCKS.getBooleanValue() &&
                            currentState.getBlock() instanceof FluidBlock);
-        
+
         if (!canPlace) {
-            if (PrinterConfig.PRINTER_DEBUG_LOG.getBooleanValue()) 
-                System.out.println("InteractActionImpl.interact: block is not air and fluid replacement is disabled");
             return ActionResult.FAIL;
         }
-        if (PrinterConfig.PRINTER_DEBUG_LOG.getBooleanValue()) System.out.println("InteractActionImpl.interact: attempting to air place block");
         airPlace(pos);
         return ActionResult.PASS;
     }
@@ -60,17 +55,8 @@ public class AirPlaceAction extends InteractAction {
         connection.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.SWAP_ITEM_WITH_OFFHAND, BlockPos.ORIGIN, Direction.DOWN));
 
         Hand hand = Hand.OFF_HAND;
-        // Build a synthetic hit result anchored on the target block position (inside-block) but preserving
-        // the sampled side & hit vector for orientation. This avoids accidentally clicking a real neighbor
-        // and placing a block one block ahead (issue seen with hoppers & slabs).
-        BlockHitResult original = this.context.hitResult;
-        BlockHitResult placeHit;
-        if (original != null) {
-            placeHit = new BlockHitResult(original.getPos(), original.getSide(), pos, true);
-        } else {
-            placeHit = new BlockHitResult(Vec3d.ofCenter(pos), Direction.DOWN, pos, true);
-        }
-        interactionManager.interactBlock(mc.player, hand, placeHit);
+        BlockHitResult blockHitResult = new BlockHitResult(this.context.hitResult.getPos(), this.context.hitResult.getSide(), pos, true);
+        interactionManager.interactBlock(mc.player, hand, blockHitResult);
         mc.player.swingHand(Hand.MAIN_HAND, false);
         connection.sendPacket(new HandSwingC2SPacket(hand));
         connection.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.SWAP_ITEM_WITH_OFFHAND, BlockPos.ORIGIN, Direction.DOWN));

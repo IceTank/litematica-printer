@@ -34,17 +34,6 @@ import java.util.Optional;
  * for player state depending on the block being placed.
  */
 public class GeneralPlacementGuide extends PlacementGuide {
-    protected static Vec3d[] hitVecsToTry = new Vec3d[]{
-            new Vec3d(-0.25, -0.25, -0.25),
-            new Vec3d(+0.25, -0.25, -0.25),
-            new Vec3d(-0.25, +0.25, -0.25),
-            new Vec3d(-0.25, -0.25, +0.25),
-            new Vec3d(+0.25, +0.25, -0.25),
-            new Vec3d(-0.25, +0.25, +0.25),
-            new Vec3d(+0.25, -0.25, +0.25),
-            new Vec3d(+0.25, +0.25, +0.25)
-    };
-
     protected static Vec3d[] extendedHitVecs = new Vec3d[]{
             new Vec3d(-0.25, -0.25, -0.25),
             new Vec3d(+0.25, -0.25, -0.25),
@@ -122,7 +111,7 @@ public class GeneralPlacementGuide extends PlacementGuide {
     }
 
     protected Vec3d[] getPossibleHitVecs() {
-        return PrinterConfig.CARPET_MODE.getBooleanValue() ? extendedHitVecs : hitVecsToTry;
+        return extendedHitVecs;
     }
 
     private List<Direction> getValidSides(SchematicBlockState state) {
@@ -170,7 +159,7 @@ public class GeneralPlacementGuide extends PlacementGuide {
     @Override
     public @Nullable PrinterPlacementContext getPlacementContext(ClientPlayerEntity player) {
         if (PrinterConfig.PRINTER_AIRPLACE.getBooleanValue()) {
-            return getContextByRotation(player);
+            return getAirplaceContext(player);
         } else {
             return getContextByStrictLook(player);
         }
@@ -281,16 +270,16 @@ public class GeneralPlacementGuide extends PlacementGuide {
     }
 
     protected static Direction[] directionsToTry = new Direction[]{
+            Direction.UP,
+            Direction.DOWN,
             Direction.NORTH,
             Direction.SOUTH,
             Direction.EAST,
-            Direction.WEST,
-            Direction.UP,
-            Direction.DOWN
+            Direction.WEST
     };
 
     @Nullable
-    public PrinterPlacementContext getContextByRotation(ClientPlayerEntity player) {
+    public PrinterPlacementContext getAirplaceContext(ClientPlayerEntity player) {
         if (contextCache != null && !LitematicaMixinMod.DEBUG) return contextCache;
 
         ItemStack requiredItem = getRequiredItem(player).stream().findFirst().orElse(ItemStack.EMPTY);
@@ -305,27 +294,24 @@ public class GeneralPlacementGuide extends PlacementGuide {
         // We'll brute force: sides (including horizontal) + hit positions inside the target block volume
         // to emulate realistic clicks that yield correct orientation for special blocks (hoppers, froglights, basalt, slabs).
 
-        // Candidate sides to emulate a supporting face. For airplace we pretend there is a block on that side.
-        Direction[] candidateSides = new Direction[]{
-                Direction.UP, Direction.DOWN,
-                Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST
-        };
-
-        // Hit offsets inside block relative to its min corner (0..1). Include lower y (<0.5) for bottom slabs, and center variations.
-        double[] ySamples = new double[]{0.25, 0.5, 0.75};
-        double[] xzSamples = new double[]{0.25, 0.5, 0.75};
-
         // First quick attempt: original center (UP side) (fast path)
         {
             BlockHitResult hr = new BlockHitResult(Vec3d.ofCenter(state.blockPos), Direction.UP, state.blockPos, true);
             PrinterPlacementContext quick = new PrinterPlacementContext(player, hr, requiredItem, slot, null, false);
             BlockState res = getRequiredItemAsBlock(player).orElse(targetState.getBlock()).getPlacementState(quick);
             if (res != null && correctObserverPlacement(targetState, res) && statesEqual(res, targetState)) {
-                contextCache = quick; quick.isAirPlace = true; return quick; }
+                contextCache = quick;
+                quick.isAirPlace = true;
+                return quick;
+            }
         }
 
+        // Hit offsets inside block relative to its min corner (0..1). Include lower y (<0.5) for bottom slabs, and center variations.
+        double[] ySamples = new double[]{0.25, 0.5, 0.75};
+        double[] xzSamples = new double[]{0.25, 0.5, 0.75};
+
         for (Direction lookDirection : directionsToTry) {
-            for (Direction side : candidateSides) {
+            for (Direction side : getPossibleSides()) {
                 // Neighbor position (imaginary supporting block). For DOWN side we offset below, etc.
                 BlockPos neighborPos = state.blockPos.offset(side);
 
@@ -338,14 +324,14 @@ public class GeneralPlacementGuide extends PlacementGuide {
                             Vec3d hitVec = Vec3d.of(state.blockPos).add(sample);
 
                             // Ensure the hitVec lies on the correct face for the side: project coordinate component to face plane center
-                            switch (side) {
-                                case UP: hitVec = new Vec3d(hitVec.x, state.blockPos.getY() + 1 - 1e-4, hitVec.z); break;
-                                case DOWN: hitVec = new Vec3d(hitVec.x, state.blockPos.getY() + 1e-4, hitVec.z); break;
-                                case NORTH: hitVec = new Vec3d(hitVec.x, hitVec.y, state.blockPos.getZ() + 1e-4); break;
-                                case SOUTH: hitVec = new Vec3d(hitVec.x, hitVec.y, state.blockPos.getZ() + 1 - 1e-4); break;
-                                case WEST: hitVec = new Vec3d(state.blockPos.getX() + 1e-4, hitVec.y, hitVec.z); break;
-                                case EAST: hitVec = new Vec3d(state.blockPos.getX() + 1 - 1e-4, hitVec.y, hitVec.z); break;
-                            }
+                            hitVec = switch (side) {
+                                case UP -> new Vec3d(hitVec.x, state.blockPos.getY() + 1 - 1e-4, hitVec.z);
+                                case DOWN -> new Vec3d(hitVec.x, state.blockPos.getY() + 1e-4, hitVec.z);
+                                case NORTH -> new Vec3d(hitVec.x, hitVec.y, state.blockPos.getZ() + 1e-4);
+                                case SOUTH -> new Vec3d(hitVec.x, hitVec.y, state.blockPos.getZ() + 1 - 1e-4);
+                                case WEST -> new Vec3d(state.blockPos.getX() + 1e-4, hitVec.y, hitVec.z);
+                                case EAST -> new Vec3d(state.blockPos.getX() + 1 - 1e-4, hitVec.y, hitVec.z);
+                            };
 
                             BlockHitResult hitResult = new BlockHitResult(hitVec, side.getOpposite(), neighborPos, false);
                             PrinterPlacementContext context = new PrinterPlacementContext(player, hitResult, requiredItem, slot, lookDirection, false);
@@ -353,7 +339,9 @@ public class GeneralPlacementGuide extends PlacementGuide {
                                     .orElse(targetState.getBlock())
                                     .getPlacementState(context);
                             if (result != null && correctObserverPlacement(targetState, result) && statesEqual(result, targetState)) {
-                                contextCache = context; context.isAirPlace = true; return context;
+                                contextCache = context;
+                                context.isAirPlace = true;
+                                return context;
                             }
                         }
                     }
