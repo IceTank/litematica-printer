@@ -11,6 +11,7 @@ public class PropertySpecificGuesserGuide extends GeneralPlacementGuide {
     protected static Property<?>[] ignoredProperties = new Property[]{
             RepeaterBlock.DELAY,
             ComparatorBlock.MODE,
+            ComposterBlock.LEVEL,
             RedstoneWireBlock.POWER,
             RedstoneWireBlock.WIRE_CONNECTION_EAST,
             RedstoneWireBlock.WIRE_CONNECTION_NORTH,
