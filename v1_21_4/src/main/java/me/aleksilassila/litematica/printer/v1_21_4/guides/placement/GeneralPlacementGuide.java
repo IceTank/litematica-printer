@@ -270,12 +270,12 @@ public class GeneralPlacementGuide extends PlacementGuide {
     }
 
     protected static Direction[] directionsToTry = new Direction[]{
-            Direction.UP,
-            Direction.DOWN,
             Direction.NORTH,
             Direction.SOUTH,
             Direction.EAST,
-            Direction.WEST
+            Direction.WEST,
+            Direction.UP,
+            Direction.DOWN
     };
 
     @Nullable
