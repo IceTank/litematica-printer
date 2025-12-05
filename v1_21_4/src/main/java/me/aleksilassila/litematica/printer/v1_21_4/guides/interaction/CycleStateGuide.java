@@ -1,8 +1,7 @@
 package me.aleksilassila.litematica.printer.v1_21_4.guides.interaction;
 
 import me.aleksilassila.litematica.printer.v1_21_4.SchematicBlockState;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.LeverBlock;
+import net.minecraft.block.*;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.property.Properties;
@@ -24,9 +23,20 @@ public class CycleStateGuide extends InteractionGuide {
 
     @Override
     public boolean canExecute(ClientPlayerEntity player) {
-        if (!super.canExecute(player)) return false;
+        if (!playerHasRightItem(player)) return false;
 
-        return targetState.getBlock() == currentState.getBlock();
+        if (currentState.getBlock() == Blocks.IRON_TRAPDOOR) {
+            return false; // Iron trapdoors cannot be toggled by interaction
+        }
+
+        if (currentState.getBlock() != targetState.getBlock()) {
+            return false; // Different blocks cannot be toggled
+        }
+
+        BlockState targetState = state.targetState;
+        BlockState currentState = state.currentState;
+
+        return !statesEqual(targetState, currentState);
     }
 
     @Override
@@ -37,7 +47,7 @@ public class CycleStateGuide extends InteractionGuide {
     @Override
     protected boolean statesEqual(BlockState state1, BlockState state2) {
         if (state2.getBlock() instanceof LeverBlock) {
-            return super.statesEqual(state1, state2);
+            return super.statesEqualIgnoreProperties(state1, state2);
         }
 
         return statesEqualIgnoreProperties(state1, state2, propertiesToIgnore);

@@ -30,13 +30,6 @@ public class Guides {
         registerGuide(FlowerPotGuide.class, FlowerPotBlock.class);
         registerGuide(FlowerPotFillGuide.class, FlowerPotBlock.class);
 
-//        registerGuide(PropertySpecificGuesserGuide.class,
-//                RepeaterBlock.class, ComparatorBlock.class, RedstoneWireBlock.class, RedstoneTorchBlock.class,
-//                BambooBlock.class, CactusBlock.class, SaplingBlock.class, ScaffoldingBlock.class, PointedDripstoneBlock.class,
-//                HorizontalConnectingBlock.class, DoorBlock.class, TrapdoorBlock.class, FenceGateBlock.class, ChestBlock.class,
-//                SnowBlock.class, SeaPickleBlock.class, CandleBlock.class, LeverBlock.class, EndPortalFrameBlock.class,
-//                NoteBlock.class, CampfireBlock.class, PoweredRailBlock.class, LeavesBlock.class, TripwireHookBlock.class,
-//                PistonBlock.class, WallBlock.class, HopperBlock.class);
         registerGuide(FallingBlockGuide.class, FallingBlock.class);
         registerGuide(BlockIndifferentGuesserGuide.class, BambooBlock.class, BigDripleafStemBlock.class, BigDripleafBlock.class,
                 TwistingVinesPlantBlock.class, TripwireBlock.class, MushroomBlock.class, MultifaceGrowthBlock.class);
@@ -44,14 +37,18 @@ public class Guides {
         registerGuide(CampfireExtinguishGuide.class, CampfireBlock.class);
         registerGuide(LightCandleGuide.class, AbstractCandleBlock.class);
         registerGuide(EnderEyeGuide.class, EndPortalFrameBlock.class);
+
+        // Catch most blocks
+        registerGuide(PropertySpecificGuesserGuide.class);
+//        registerGuide(LogGuide.class);
+
+        // Anything that replaces or changes stuff after placement
         registerGuide(CycleStateGuide.class,
                 DoorBlock.class, FenceGateBlock.class, TrapdoorBlock.class,
                 LeverBlock.class,
                 RepeaterBlock.class, ComparatorBlock.class, NoteBlock.class);
         registerGuide(BlockReplacementGuide.class, SnowBlock.class, SeaPickleBlock.class, CandleBlock.class, SlabBlock.class);
-        registerGuide(LogGuide.class);
         registerGuide(LogStrippingGuide.class);
-        registerGuide(PropertySpecificGuesserGuide.class);
     }
 
     public ArrayList<Pair<Class<? extends Guide>, Class<? extends Block>[]>> getGuides() {
