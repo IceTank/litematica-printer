@@ -5,12 +5,11 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.SlabBlock;
 import net.minecraft.block.enums.SlabType;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class SlabGuide extends GuesserGuide {
+public class SlabGuide extends GeneralPlacementGuide {
     public SlabGuide(SchematicBlockState state) {
         super(state);
     }

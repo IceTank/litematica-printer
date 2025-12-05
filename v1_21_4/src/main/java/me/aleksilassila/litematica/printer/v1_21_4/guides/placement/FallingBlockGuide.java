@@ -6,7 +6,7 @@ import net.minecraft.block.FallingBlock;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.util.math.Direction;
 
-public class FallingBlockGuide extends GuesserGuide {
+public class FallingBlockGuide extends GeneralPlacementGuide {
 
     public FallingBlockGuide(SchematicBlockState state) {
         super(state);

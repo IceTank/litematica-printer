@@ -4,7 +4,10 @@ import me.aleksilassila.litematica.printer.v1_21_4.SchematicBlockState;
 import me.aleksilassila.litematica.printer.v1_21_4.config.PrinterConfig;
 import net.minecraft.block.*;
 
-public class BlockIndifferentGuesserGuide extends GuesserGuide {
+/**
+ * A GuesserGuide that ignores certain block state properties for specific blocks.
+ */
+public class BlockIndifferentGuesserGuide extends GeneralPlacementGuide {
     public BlockIndifferentGuesserGuide(SchematicBlockState state) {
         super(state);
     }

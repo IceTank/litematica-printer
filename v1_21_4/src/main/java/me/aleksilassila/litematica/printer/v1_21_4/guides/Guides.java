@@ -51,7 +51,7 @@ public class Guides {
         registerGuide(BlockReplacementGuide.class, SnowBlock.class, SeaPickleBlock.class, CandleBlock.class, SlabBlock.class);
         registerGuide(LogGuide.class);
         registerGuide(LogStrippingGuide.class);
-        registerGuide(GuesserGuide.class);
+        registerGuide(GeneralPlacementGuide.class);
     }
 
     public ArrayList<Pair<Class<? extends Guide>, Class<? extends Block>[]>> getGuides() {

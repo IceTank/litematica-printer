@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-public class RailGuesserGuide extends GuesserGuide {
+public class RailGuesserGuide extends GeneralPlacementGuide {
     static final RailShape[] STRAIGHT_RAIL_SHAPES = new RailShape[]{
             RailShape.NORTH_SOUTH,
             RailShape.EAST_WEST

@@ -7,7 +7,7 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.state.property.Property;
 import java.util.stream.Stream;
 
-public class PropertySpecificGuesserGuide extends GuesserGuide {
+public class PropertySpecificGuesserGuide extends GeneralPlacementGuide {
     protected static Property<?>[] ignoredProperties = new Property[]{
             RepeaterBlock.DELAY,
             ComparatorBlock.MODE,
