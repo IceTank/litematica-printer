@@ -48,6 +48,14 @@ public class AirPlaceAction extends InteractAction {
         ClientPlayNetworkHandler connection = mc.getNetworkHandler();
         ClientPlayerInteractionManager interactionManager = mc.interactionManager;
         if (mc.player == null || connection == null || interactionManager == null) return;
+
+        if (mc.isInSingleplayer() && mc.player.getAbilities().creativeMode) {
+            BlockHitResult blockHitResult = new BlockHitResult(this.context.hitResult.getPos(), this.context.hitResult.getSide(), pos, true);
+            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, blockHitResult);
+            mc.player.swingHand(Hand.MAIN_HAND, false);
+            return;
+        }
+
         if (mc.player.getInventory().getStack(PlayerInventory.OFF_HAND_SLOT).getItem() instanceof BlockItem) {
             mc.interactionManager.clickSlot(0, 45, 0, SlotActionType.PICKUP, mc.player);
             mc.getNetworkHandler().sendPacket(new CloseHandledScreenC2SPacket(mc.player.playerScreenHandler.syncId));
