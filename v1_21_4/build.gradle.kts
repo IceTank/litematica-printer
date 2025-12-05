@@ -47,49 +47,18 @@ tasks.withType<ProcessResources> {
     }
 }
 
-
-val sourceModule = "v1_19_4"
-val targetModules = arrayOf("v1_19", "v1_18", "v1_17")
-
-fun copyFile(source: File) {
-    for (targetModule in targetModules) {
-        val destination = file(source.absolutePath.replace(sourceModule, targetModule))
-        println("Copying ${source.absolutePath} to ${destination.absolutePath}")
-        destination.parentFile.mkdirs()
-        source.copyTo(destination, true)
-        destination.writeText(destination.readText().replace(sourceModule, targetModule))
-    }
+tasks.build {
+    finalizedBy("renameJar")
 }
 
-fun deleteOldFiles(sourceBase: File) {
-    for (targetModule in targetModules) {
-        val targetBase = file(sourceBase.absolutePath.replace(sourceModule, targetModule))
+tasks.create("renameJar") {
+    val remapJar = tasks.getByName<RemapJarTask>("remapJar")
+    val jarFile = remapJar.archiveFile.get().asFile
 
-        for (file in targetBase.listFiles()) {
-            if (file.name.equals("implementation")) continue
-            println("Deleting recursively ${file.absolutePath}")
-            file.deleteRecursively()
-        }
-    }
-}
-
-val syncImplementations = tasks.create("syncImplementations") {
-    doFirst {
-        val sourceStart =
-            this.project.projectDir.absolutePath + "/src/main/java/me/aleksilassila/litematica/printer/" + sourceModule
-        val sourceDir = file(sourceStart)
-
-        deleteOldFiles(sourceDir)
-
-        for (sourceFile in sourceDir.listFiles()) {
-            if (sourceFile.name.equals("implementation")) continue
-
-            sourceFile.walk()
-                .filter { it.isFile }
-                .forEach {
-                    copyFile(it)
-                }
-        }
+    doLast {
+        val targetFile = File(jarFile.parent, "$archives_base_name-$mod_version-mc$minecraft_version.jar")
+        println("Renaming ${jarFile.absolutePath} to ${targetFile.absolutePath}")
+        jarFile.renameTo(targetFile)
     }
 }
 
