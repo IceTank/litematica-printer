@@ -75,19 +75,8 @@ abstract public class PlacementGuide extends Guide {
         if (requiredItems.isEmpty() || requiredItems.stream().allMatch(i -> i.isOf(Items.AIR)))
             return false;
 
-        // Allow placement in water when REPLACE_FLUIDS_SOURCE_BLOCKS is enabled
-        if (!currentState.isReplaceable() && 
-            !(LitematicaMixinMod.REPLACE_FLUIDS_SOURCE_BLOCKS.getBooleanValue() && 
-              currentState.getBlock() instanceof FluidBlock)) {
-            return false;
-        }
-
         ItemPlacementContext ctx = getPlacementContext(player);
         if (ctx == null || !ctx.canPlace()) return false;
-//        if (!state.currentState.getMaterial().isReplaceable()) return false;
-        if (!LitematicaMixinMod.REPLACE_FLUIDS_SOURCE_BLOCKS.getBooleanValue()
-                && getProperty(state.currentState, FluidBlock.LEVEL).orElse(1) == 0)
-            return false;
 
         BlockState resultState = getRequiredItemAsBlock(player)
                 .orElse(targetState.getBlock())

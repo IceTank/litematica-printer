@@ -1,6 +1,10 @@
 package me.aleksilassila.litematica.printer.v1_21_4.implementation;
 
+import me.aleksilassila.litematica.printer.v1_21_4.LitematicaMixinMod;
 import me.aleksilassila.litematica.printer.v1_21_4.config.PrinterConfig;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.FireBlock;
+import net.minecraft.block.FluidBlock;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
@@ -52,10 +56,21 @@ public class PrinterPlacementContext extends ItemPlacementContext {
 
     @Override
     public boolean canPlace() {
-        if (isAirPlace) {
-            return super.canPlace() && this.getPlayer().getEyePos().distanceTo(hitResult.getBlockPos().toCenterPos()) < PrinterConfig.PRINTER_AIRPLACE_RANGE.getDoubleValue();
+        if (!isAirPlace) {
+            return super.canPlace();
         }
-        return super.canPlace();
+        if (!super.canPlace()) {
+            return false;
+        }
+        if (this.getPlayer().getEyePos().distanceTo(hitResult.getBlockPos().toCenterPos()) > PrinterConfig.PRINTER_AIRPLACE_RANGE.getDoubleValue()) {
+            return false;
+        }
+        BlockState currentState = this.getWorld().getBlockState(hitResult.getBlockPos());
+        if (!currentState.isReplaceable() || currentState.getBlock() instanceof FireBlock) {
+            return LitematicaMixinMod.REPLACE_FLUIDS_SOURCE_BLOCKS.getBooleanValue() ||
+                    !(currentState.getBlock() instanceof FluidBlock);
+        }
+        return true;
     }
 
     @Override

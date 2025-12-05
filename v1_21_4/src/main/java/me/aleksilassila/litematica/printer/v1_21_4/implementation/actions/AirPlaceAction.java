@@ -30,14 +30,8 @@ public class AirPlaceAction extends InteractAction {
     @Override
     protected ActionResult interact(MinecraftClient client, ClientPlayerEntity player, Hand hand, BlockHitResult hitResult) {
         BlockPos pos = hitResult.isInsideBlock() ? hitResult.getBlockPos() : hitResult.getBlockPos().offset(hitResult.getSide());
-        BlockState currentState = mc.world.getBlockState(pos);
 
-        // Allow placement in air or in fluids when REPLACE_FLUIDS_SOURCE_BLOCKS is enabled
-        boolean canPlace = currentState.isAir() ||
-                          (LitematicaMixinMod.REPLACE_FLUIDS_SOURCE_BLOCKS.getBooleanValue() &&
-                           currentState.getBlock() instanceof FluidBlock);
-
-        if (!canPlace) {
+        if (!context.canPlace()) {
             return ActionResult.FAIL;
         }
         airPlace(pos);
