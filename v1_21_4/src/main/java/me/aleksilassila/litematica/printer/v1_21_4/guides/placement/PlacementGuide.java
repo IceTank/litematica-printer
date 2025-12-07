@@ -1,7 +1,5 @@
 package me.aleksilassila.litematica.printer.v1_21_4.guides.placement;
 
-import me.aleksilassila.litematica.printer.v1_21_4.LitematicaMixinMod;
-import me.aleksilassila.litematica.printer.v1_21_4.Printer;
 import me.aleksilassila.litematica.printer.v1_21_4.SchematicBlockState;
 import me.aleksilassila.litematica.printer.v1_21_4.actions.*;
 import me.aleksilassila.litematica.printer.v1_21_4.config.PrinterConfig;

@@ -66,9 +66,15 @@ public class PrinterPlacementContext extends ItemPlacementContext {
             return false;
         }
         BlockState currentState = this.getWorld().getBlockState(hitResult.getBlockPos());
-        if (!currentState.isReplaceable() || currentState.getBlock() instanceof FireBlock) {
-            return LitematicaMixinMod.REPLACE_FLUIDS_SOURCE_BLOCKS.getBooleanValue() ||
-                    !(currentState.getBlock() instanceof FluidBlock);
+        // Wrong state and not replaceable
+        if (!currentState.isReplaceable() && !(currentState.getBlock() instanceof FireBlock)) {
+            return false;
+        } else {
+            // Replaceable block. Check fluid source block replacement config
+            if (currentState.getBlock() instanceof FluidBlock && !LitematicaMixinMod.REPLACE_FLUIDS_SOURCE_BLOCKS.getBooleanValue()) {
+                // Only allow replacing fluid source blocks if the config is enabled
+                return false;
+            }
         }
         return true;
     }
