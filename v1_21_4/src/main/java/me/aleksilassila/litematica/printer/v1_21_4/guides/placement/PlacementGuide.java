@@ -71,6 +71,11 @@ abstract public class PlacementGuide extends Guide {
     public boolean canExecute(ClientPlayerEntity player) {
         if (!super.canExecute(player)) return false;
 
+        // Don't place if there's already a non-replaceable block (wrong block) at the target position
+        if (!currentState.isAir() && !currentState.isReplaceable()) {
+            return false;
+        }
+
         List<ItemStack> requiredItems = getRequiredItems();
         if (requiredItems.isEmpty() || requiredItems.stream().allMatch(i -> i.isOf(Items.AIR)))
             return false;
