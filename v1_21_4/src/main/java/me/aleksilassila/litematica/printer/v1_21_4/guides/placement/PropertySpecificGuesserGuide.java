@@ -18,6 +18,7 @@ public class PropertySpecificGuesserGuide extends GeneralPlacementGuide {
             RedstoneWireBlock.WIRE_CONNECTION_SOUTH,
             RedstoneWireBlock.WIRE_CONNECTION_WEST,
             Properties.POWERED,
+            Properties.TRIGGERED,
             Properties.OPEN,
             PointedDripstoneBlock.THICKNESS,
             ScaffoldingBlock.DISTANCE,
