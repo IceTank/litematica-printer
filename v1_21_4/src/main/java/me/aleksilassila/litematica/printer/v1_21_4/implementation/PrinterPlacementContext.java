@@ -62,10 +62,10 @@ public class PrinterPlacementContext extends ItemPlacementContext {
         if (!super.canPlace()) {
             return false;
         }
-        if (this.getPlayer().getEyePos().distanceTo(hitResult.getBlockPos().toCenterPos()) > PrinterConfig.PRINTER_AIRPLACE_RANGE.getDoubleValue()) {
+        BlockState currentState = this.getWorld().getBlockState(hitResult.getBlockPos().offset(hitResult.getSide()));
+        if (this.getPlayer().getEyePos().distanceTo(hitResult.getBlockPos().offset(hitResult.getSide()).toCenterPos()) > PrinterConfig.PRINTER_AIRPLACE_RANGE.getDoubleValue()) {
             return false;
         }
-        BlockState currentState = this.getWorld().getBlockState(hitResult.getBlockPos());
         // Wrong state and not replaceable
         if (!currentState.isReplaceable() && !(currentState.getBlock() instanceof FireBlock)) {
             return false;
