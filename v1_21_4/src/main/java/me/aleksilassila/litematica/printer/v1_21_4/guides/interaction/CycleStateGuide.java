@@ -36,8 +36,6 @@ public class CycleStateGuide extends InteractionGuide {
         BlockState targetState = state.targetState;
         BlockState currentState = state.currentState;
 
-        
-        
         if (currentState.getBlock() == Blocks.REPEATER) {
             if (currentState.get(RepeaterBlock.DELAY) == targetState.get(RepeaterBlock.DELAY)) {
                 return false;
@@ -68,8 +66,6 @@ public class CycleStateGuide extends InteractionGuide {
                 return false;
             }
         }
-
-
         
         return !statesEqual(targetState, currentState);
     }
