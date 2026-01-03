@@ -36,6 +36,37 @@ public class CycleStateGuide extends InteractionGuide {
         BlockState targetState = state.targetState;
         BlockState currentState = state.currentState;
 
+        if (currentState.getBlock() == Blocks.REPEATER) {
+            if (currentState.get(RepeaterBlock.DELAY) == targetState.get(RepeaterBlock.DELAY)) {
+                return false;
+            }
+        }
+        if (currentState.getBlock() == Blocks.LEVER) {
+            if (currentState.get(LeverBlock.POWERED) == targetState.get(LeverBlock.POWERED)) {
+                return false;
+            }
+        }
+        if (currentState.getBlock() == Blocks.COMPARATOR) {
+            if (currentState.get(ComparatorBlock.MODE) == targetState.get(ComparatorBlock.MODE)) {
+                return false;
+            }
+        }
+        if (currentState.getBlock() instanceof TrapdoorBlock) {
+            if (currentState.get(TrapdoorBlock.OPEN) == targetState.get(TrapdoorBlock.OPEN)) {
+                return false;
+            }
+        }
+        if (currentState.getBlock() instanceof DoorBlock) {
+            if (currentState.get(DoorBlock.OPEN) == targetState.get(DoorBlock.OPEN)) {
+                return false;
+            }
+        }
+        if (currentState.getBlock() instanceof FenceGateBlock) {
+            if (currentState.get(FenceGateBlock.OPEN) == targetState.get(FenceGateBlock.OPEN)) {
+                return false;
+            }
+        }
+        
         return !statesEqual(targetState, currentState);
     }
 
