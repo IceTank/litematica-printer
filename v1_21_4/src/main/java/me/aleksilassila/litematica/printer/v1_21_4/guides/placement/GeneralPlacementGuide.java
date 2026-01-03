@@ -275,6 +275,14 @@ public class GeneralPlacementGuide extends PlacementGuide {
             Direction.DOWN
     };
 
+    /**
+     * Produces a PrinterPlacementContext for air placing blocks. The HitResult is brute forced by trying all sides and
+     * various hit positions inside the block volume. The HitResult block places against the neighbor block in the given
+     * side direction. To get the target block position we offset the {@link BlockHitResult#getBlockPos()} by the side
+     * direction.
+     * @param player the player
+     * @return the PrinterPlacementContext or null if no valid context was found
+     */
     @Nullable
     public PrinterPlacementContext getAirplaceContext(ClientPlayerEntity player) {
         if (contextCache != null && !LitematicaMixinMod.DEBUG) return contextCache;
