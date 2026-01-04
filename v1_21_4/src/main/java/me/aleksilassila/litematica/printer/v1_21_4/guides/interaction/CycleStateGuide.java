@@ -14,7 +14,14 @@ import java.util.List;
 public class CycleStateGuide extends InteractionGuide {
     private static final Property<?>[] propertiesToIgnore = new Property[]{
             Properties.POWERED,
-            Properties.LIT
+            Properties.LIT,
+            Properties.BLOCK_FACE,
+            Properties.FACING,
+            Properties.LOCKED,
+            Properties.BLOCK_HALF,
+            Properties.DOOR_HINGE,
+            Properties.IN_WALL,
+            RepeaterBlock.FACING
     };
 
     public CycleStateGuide(SchematicBlockState state) {
@@ -36,51 +43,17 @@ public class CycleStateGuide extends InteractionGuide {
         BlockState targetState = state.targetState;
         BlockState currentState = state.currentState;
 
-        if (currentState.getBlock() == Blocks.REPEATER) {
-            if (currentState.get(RepeaterBlock.DELAY) == targetState.get(RepeaterBlock.DELAY)) {
-                return false;
-            }
-        }
         if (currentState.getBlock() == Blocks.LEVER) {
             if (currentState.get(LeverBlock.POWERED) == targetState.get(LeverBlock.POWERED)) {
-                return false;
+                return false; // Lever blocks must be toggled if POWERED property is incorrect, regardless of other properties
             }
+            return true;
         }
-        if (currentState.getBlock() == Blocks.COMPARATOR) {
-            if (currentState.get(ComparatorBlock.MODE) == targetState.get(ComparatorBlock.MODE)) {
-                return false;
-            }
-        }
-        if (currentState.getBlock() instanceof TrapdoorBlock) {
-            if (currentState.get(TrapdoorBlock.OPEN) == targetState.get(TrapdoorBlock.OPEN)) {
-                return false;
-            }
-        }
-        if (currentState.getBlock() instanceof DoorBlock) {
-            if (currentState.get(DoorBlock.OPEN) == targetState.get(DoorBlock.OPEN)) {
-                return false;
-            }
-        }
-        if (currentState.getBlock() instanceof FenceGateBlock) {
-            if (currentState.get(FenceGateBlock.OPEN) == targetState.get(FenceGateBlock.OPEN)) {
-                return false;
-            }
-        }
-        
-        return !statesEqual(targetState, currentState);
+        return !statesEqualIgnoreProperties(targetState, currentState, propertiesToIgnore);
     }
 
     @Override
     protected @NotNull List<ItemStack> getRequiredItems() {
         return Collections.singletonList(ItemStack.EMPTY);
-    }
-
-    @Override
-    protected boolean statesEqual(BlockState state1, BlockState state2) {
-        if (state2.getBlock() instanceof LeverBlock) {
-            return super.statesEqualIgnoreProperties(state1, state2);
-        }
-
-        return statesEqualIgnoreProperties(state1, state2, propertiesToIgnore);
     }
 }
