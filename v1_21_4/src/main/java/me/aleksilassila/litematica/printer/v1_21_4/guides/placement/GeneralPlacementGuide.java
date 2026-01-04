@@ -317,9 +317,6 @@ public class GeneralPlacementGuide extends PlacementGuide {
 
         for (Direction lookDirection : directionsToTry) {
             for (Direction side : getPossibleSides()) {
-                // Neighbor position (imaginary supporting block). For DOWN side we offset below, etc.
-                BlockPos neighborPos = state.blockPos.offset(side);
-
                 // For each sample point on the face or interior adjust the hit vector.
                 for (double y : ySamples) {
                     for (double x : xzSamples) {
@@ -338,7 +335,7 @@ public class GeneralPlacementGuide extends PlacementGuide {
                                 case EAST -> new Vec3d(state.blockPos.getX() + 1 - 1e-4, hitVec.y, hitVec.z);
                             };
 
-                            BlockHitResult hitResult = new BlockHitResult(hitVec, side.getOpposite(), neighborPos, false);
+                            BlockHitResult hitResult = new BlockHitResult(hitVec, side.getOpposite(), state.blockPos, true);
                             PrinterPlacementContext context = new PrinterPlacementContext(player, hitResult, requiredItem, slot, lookDirection, false);
                             BlockState result = getRequiredItemAsBlock(player)
                                     .orElse(targetState.getBlock())
