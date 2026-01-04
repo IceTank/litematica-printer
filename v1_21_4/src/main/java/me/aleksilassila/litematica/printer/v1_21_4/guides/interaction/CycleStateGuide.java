@@ -15,11 +15,11 @@ public class CycleStateGuide extends InteractionGuide {
     private static final Property<?>[] propertiesToIgnore = new Property[]{
             Properties.POWERED,
             Properties.LIT,
-            Properties.FACE,
+            Properties.BLOCK_FACE,
             Properties.FACING,
             Properties.LOCKED,
-            Properties.HALF,
-            Properties.HINGE,
+            Properties.BLOCK_HALF,
+            Properties.DOOR_HINGE,
             Properties.IN_WALL
     };
 
@@ -42,24 +42,17 @@ public class CycleStateGuide extends InteractionGuide {
         BlockState targetState = state.targetState;
         BlockState currentState = state.currentState;
 
-        if (currentState.get(LeverBlock.POWERED) == targetState.get(LeverBlock.POWERED)) {
-            return false;
+        if (currentState.getBlock() == Blocks.LEVER) {
+            if (currentState.get(LeverBlock.POWERED) == targetState.get(LeverBlock.POWERED)) {
+                return false; // Lever blocks must be toggled if POWERED property is incorrect, regardless of other properties
+            }
+            return true;
         }
-
-        return !statesEqual(targetState, currentState);
+        return !statesEqualIgnoreProperties(targetState, currentState, propertiesToIgnore);
     }
 
     @Override
     protected @NotNull List<ItemStack> getRequiredItems() {
         return Collections.singletonList(ItemStack.EMPTY);
-    }
-
-    @Override
-    protected boolean statesEqual(BlockState state1, BlockState state2) {
-        if (state2.getBlock() instanceof LeverBlock) {
-            return super.statesEqualIgnoreProperties(state1, state2);
-        }
-
-        return statesEqualIgnoreProperties(state1, state2, propertiesToIgnore);
     }
 }
