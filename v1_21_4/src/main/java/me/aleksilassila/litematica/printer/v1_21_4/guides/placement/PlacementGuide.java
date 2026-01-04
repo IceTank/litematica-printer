@@ -69,6 +69,10 @@ abstract public class PlacementGuide extends Guide {
     public boolean canExecute(ClientPlayerEntity player) {
         if (!super.canExecute(player)) return false;
 
+        if (targetState.getBlock() == currentState.getBlock()) {
+            return false;
+        }
+
         List<ItemStack> requiredItems = getRequiredItems();
         if (requiredItems.isEmpty() || requiredItems.stream().allMatch(i -> i.isOf(Items.AIR)))
             return false;
