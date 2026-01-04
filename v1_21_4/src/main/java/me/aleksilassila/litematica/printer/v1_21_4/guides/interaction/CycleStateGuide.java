@@ -20,7 +20,8 @@ public class CycleStateGuide extends InteractionGuide {
             Properties.LOCKED,
             Properties.BLOCK_HALF,
             Properties.DOOR_HINGE,
-            Properties.IN_WALL
+            Properties.IN_WALL,
+            RepeaterBlock.FACING
     };
 
     public CycleStateGuide(SchematicBlockState state) {
