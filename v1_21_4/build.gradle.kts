@@ -58,6 +58,7 @@ tasks.create("renameJar") {
     doLast {
         val targetFile = File(jarFile.parent, "$archives_base_name-$mod_version-mc$minecraft_version.jar")
         println("Renaming ${jarFile.absolutePath} to ${targetFile.absolutePath}")
+        targetFile.delete()
         jarFile.renameTo(targetFile)
     }
 }
