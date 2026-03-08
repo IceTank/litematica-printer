@@ -64,6 +64,7 @@ public class PrinterConfig {
     public static final ConfigString PRINTER_HOTBAR_SLOTS = new ConfigString("printerHotbarSlots", "3,4,5,6,7,8,9", "Hotbar slots to use for the printer. Numbers from 1-9 separated by commas.");
     public static final ConfigBoolean AUTO_CONVERT_SCHEMATIC_TO_LITEMATIC_ON_LOAD = new ConfigBoolean("autoConvertSchematicToLitematicOnLoad", false, "Automatically convert schematic files to litematic files when loading them.");
     public static final ConfigBoolean PRINTER_PLACE_OBSERVERS_LAST = new ConfigBoolean("printerPlaceObserversLast", false, "Only place observers when the block infront of them in the schematic is either air or already placed in the world.");
+    public static final ConfigBoolean WATERLOGGING = new ConfigBoolean("printerWaterlogging", false, "Automatically waterlog blocks with water buckets that should be waterlogged in the schematic.");
 
     public ImmutableList<IConfigBase> getOptions() {
         List<IConfigBase> list = new java.util.ArrayList<>(Configs.Generic.OPTIONS);
@@ -100,6 +101,7 @@ public class PrinterConfig {
         list.add(PRINTER_HOTBAR_SLOTS);
         list.add(AUTO_CONVERT_SCHEMATIC_TO_LITEMATIC_ON_LOAD);
         list.add(PRINTER_PLACE_OBSERVERS_LAST);
+        list.add(WATERLOGGING);
 
         PRINTER_DEBUG_LOG.setValueChangeCallback(config -> {
             if (config.getBooleanValue()) {

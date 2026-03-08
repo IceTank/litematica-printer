@@ -93,7 +93,7 @@ abstract public class Guide extends BlockHelperImpl {
 
         loop:
         for (Property<?> property : state1.getProperties()) {
-            if (property == Properties.WATERLOGGED && !(state1.getBlock() instanceof CoralBlock)) continue;
+            if (!PrinterConfig.WATERLOGGING.getBooleanValue() && property == Properties.WATERLOGGED && !(state1.getBlock() instanceof CoralBlock)) continue;
 
             for (Property<?> ignoredProperty : propertiesToIgnore) {
                 if (property == ignoredProperty) continue loop;

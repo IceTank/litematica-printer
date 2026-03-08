@@ -401,7 +401,7 @@ public class GeneralPlacementGuide extends PlacementGuide {
         }
     }
 
-    private boolean canSeeBlockFace(ClientPlayerEntity player, BlockHitResult hitResult) {
+    protected boolean canSeeBlockFace(ClientPlayerEntity player, BlockHitResult hitResult) {
         // Draw a line between the player pos and the block pos and check if the block side is visible
         // BlockPos targetPos = state.blockPos;
 
