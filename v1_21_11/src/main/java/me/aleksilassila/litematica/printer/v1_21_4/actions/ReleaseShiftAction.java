@@ -2,7 +2,7 @@ package me.aleksilassila.litematica.printer.v1_21_4.actions;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerInputC2SPacket;
 import net.minecraft.util.PlayerInput;
 
 public class ReleaseShiftAction extends Action {
@@ -12,9 +12,7 @@ public class ReleaseShiftAction extends Action {
         player.input.playerInput = new PlayerInput(player.input.playerInput.forward(),
                 player.input.playerInput.backward(), player.input.playerInput.left(), player.input.playerInput.right(),
                 player.input.playerInput.jump(), mc.options.sneakKey.isPressed(), player.input.playerInput.sprint());
-        if (!mc.options.sneakKey.isPressed()) {
-            player.networkHandler.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.STOP_SNEAKING));
-        }
+        player.networkHandler.sendPacket(new PlayerInputC2SPacket(player.input.playerInput));
         return true;
     }
 }

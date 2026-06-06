@@ -33,7 +33,7 @@ public class ButtonListenerMixin {
         if (!warnType.get() || !PrinterConfig.AUTO_CONVERT_SCHEMATIC_TO_LITEMATIC_ON_LOAD.getBooleanValue()) {
             return;
         }
-        LitematicaSchematic newSchem = SchematicConverter.convertAndReturn(schematic.get().getFile().toFile(), entry.getDirectory());
+        LitematicaSchematic newSchem = SchematicConverter.convertAndReturn(schematic.get().getFile().toFile(), entry.getDirectory().toFile());
         warnType.set(false);
         schematic.set(newSchem);
         InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, 15000, "Auto converted schematic to litematic format");
