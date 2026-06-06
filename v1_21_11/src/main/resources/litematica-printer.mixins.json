@@ -9,6 +9,7 @@
   ],
   "client": [
     "AxeItemAccessor",
+    "GameOptionsAccessor",
     "ButtonListenerMixin",
     "ConfigsMixin",
     "GuiConfigsMixin",
