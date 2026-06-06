@@ -13,7 +13,7 @@ public class ReleaseShiftAction extends Action {
                 player.input.playerInput.backward(), player.input.playerInput.left(), player.input.playerInput.right(),
                 player.input.playerInput.jump(), mc.options.sneakKey.isPressed(), player.input.playerInput.sprint());
         if (!mc.options.sneakKey.isPressed()) {
-            player.networkHandler.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
+            player.networkHandler.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.STOP_SNEAKING));
         }
         return true;
     }

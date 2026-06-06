@@ -36,9 +36,9 @@ abstract public class Guide extends BlockHelperImpl {
     public int getSlotWithItem(ClientPlayerEntity player, ItemStack itemStack) {
         PlayerInventory inventory = player.getInventory();
 
-        for (int i = 0; i < inventory.main.size(); ++i) {
-            if (itemStack.isEmpty() && inventory.main.get(i).isOf(itemStack.getItem())) return i;
-            if (!inventory.main.get(i).isEmpty() && ItemStack.areItemsEqual(inventory.main.get(i), itemStack)) {
+        for (int i = 0; i < 36; ++i) {
+            if (itemStack.isEmpty() && inventory.getStack(i).isOf(itemStack.getItem())) return i;
+            if (!inventory.getStack(i).isEmpty() && ItemStack.areItemsEqual(inventory.getStack(i), itemStack)) {
                 return i;
             }
         }
@@ -48,7 +48,7 @@ abstract public class Guide extends BlockHelperImpl {
 
     protected int getRequiredItemStackSlot(ClientPlayerEntity player) {
         if (player.getAbilities().creativeMode) {
-            return player.getInventory().selectedSlot;
+            return player.getInventory().getSelectedSlot();
         }
 
         ItemStack requiredItem = getRequiredItem(player).stream().findFirst().orElse(ItemStack.EMPTY);

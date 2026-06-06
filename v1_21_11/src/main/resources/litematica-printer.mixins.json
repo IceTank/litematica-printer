@@ -15,6 +15,7 @@
     "InputHandlerMixin",
     "MixinAccessorClientPlayerEntity",
     "MixinAccessorKeyBinding",
+    "PlayerInventoryAccessor",
     "MixinCamera",
     "MixinClientPlayerEntity",
     "MixinMouse",

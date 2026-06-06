@@ -68,7 +68,7 @@ public class MovementHandler {
     }
 
     public static void grimRotate(ClientPlayerEntity player, float yaw, float pitch) {
-        Vec3d playerPos = player.getPos();
+        Vec3d playerPos = new Vec3d(player.getX(), player.getY(), player.getZ());
         mc.getNetworkHandler().sendPacket(new PlayerInputC2SPacket(player.input.playerInput));
         mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.Full(playerPos.x, playerPos.y, playerPos.z, yaw, pitch, player.isOnGround(), player.horizontalCollision));
         ((MixinAccessorClientPlayerEntity) mc.player).setLastYaw(yaw);
@@ -207,6 +207,6 @@ public class MovementHandler {
     }
 
     static boolean isKeyPressed(KeyBinding keyBinding) {
-        return InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), ((MixinAccessorKeyBinding) keyBinding).getBoundKey().getCode());
+        return InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow(), ((MixinAccessorKeyBinding) keyBinding).getBoundKey().getCode());
     }
 }

@@ -96,7 +96,7 @@ public class Printer {
 
         findBlock:
         for (BlockPos position : positions) {
-            SchematicBlockState state = new SchematicBlockState(player.getWorld(), worldSchematic, position);
+            SchematicBlockState state = new SchematicBlockState(mc.world, worldSchematic, position);
             if (state.targetState.equals(state.currentState) || state.targetState.isAir()) continue;
 
             Guide[] guides = interactionGuides.getInteractionGuides(state);
@@ -117,29 +117,29 @@ public class Printer {
     private List<BlockPos> getBlocksPlayerOccupied() {
         ArrayList<BlockPos> positions = new ArrayList<>();
         BlockPos playerPos = player.getBlockPos();
-        int blocksHeightOccupied = (int) Math.ceil(player.getPos().y + player.getHeight() - playerPos.getY());
+        int blocksHeightOccupied = (int) Math.ceil(player.getY() + player.getHeight() - playerPos.getY());
 
         positions.add(player.getBlockPos());
         positions.add(player.getBlockPos().up());
         if (blocksHeightOccupied > 2) {
             positions.add(playerPos.up(2));
         }
-        if (Math.floor(player.getPos().x + player.getWidth() / 2) > playerPos.getX()) {
+        if (Math.floor(player.getX() + player.getWidth() / 2) > playerPos.getX()) {
             for (int i = 0; i < blocksHeightOccupied; i++) {
                 positions.add(playerPos.up(i).east());
             }
         }
-        if ((player.getPos().x - player.getWidth() / 2) < playerPos.getX()) {
+        if ((player.getX() - player.getWidth() / 2) < playerPos.getX()) {
             for (int i = 0; i < blocksHeightOccupied; i++) {
                 positions.add(playerPos.up(i).west());
             }
         }
-        if (Math.floor(player.getPos().z + player.getWidth() / 2) > playerPos.getZ()) {
+        if (Math.floor(player.getZ() + player.getWidth() / 2) > playerPos.getZ()) {
             for (int i = 0; i < blocksHeightOccupied; i++) {
                 positions.add(playerPos.up(i).south());
             }
         }
-        if ((player.getPos().z - player.getWidth() / 2) < playerPos.getZ()) {
+        if ((player.getZ() - player.getWidth() / 2) < playerPos.getZ()) {
             for (int i = 0; i < blocksHeightOccupied; i++) {
                 positions.add(playerPos.up(i).north());
             }
@@ -172,8 +172,8 @@ public class Printer {
         return positions.stream()
 //                .filter(p -> playerOccupied.stream().noneMatch(p::equals))
                 .sorted((a, b) -> {
-                    double aDistance = this.player.getPos().squaredDistanceTo(Vec3d.ofCenter(a));
-                    double bDistance = this.player.getPos().squaredDistanceTo(Vec3d.ofCenter(b));
+                    double aDistance = new Vec3d(this.player.getX(), this.player.getY(), this.player.getZ()).squaredDistanceTo(Vec3d.ofCenter(a));
+                    double bDistance = new Vec3d(this.player.getX(), this.player.getY(), this.player.getZ()).squaredDistanceTo(Vec3d.ofCenter(b));
                     return Double.compare(aDistance, bDistance);
                 }).toList();
     }
