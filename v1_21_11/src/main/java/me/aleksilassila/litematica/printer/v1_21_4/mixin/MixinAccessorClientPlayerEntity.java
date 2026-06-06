@@ -9,12 +9,6 @@ public interface MixinAccessorClientPlayerEntity {
     @Accessor("ticksLeftToDoubleTapSprint")
     void setTicksLeftToDoubleTapSprint(int ticksLeftToDoubleTapSprint);
 
-    @Accessor("lastSneaking")
-    boolean getLastSneaking();
-
-    @Accessor("lastSneaking")
-    void setLastSneaking(boolean lastSneaking);
-
     @Accessor("lastPitch")
     float getLastPitch();
     @Accessor("lastPitch")
