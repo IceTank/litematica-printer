@@ -8,14 +8,4 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface MixinAccessorClientPlayerEntity {
     @Accessor("ticksLeftToDoubleTapSprint")
     void setTicksLeftToDoubleTapSprint(int ticksLeftToDoubleTapSprint);
-
-    @Accessor("lastPitch")
-    float getLastPitch();
-    @Accessor("lastPitch")
-    void setLastPitch(float lastPitch);
-
-    @Accessor("lastYaw")
-    float getLastYaw();
-    @Accessor("lastYaw")
-    void setLastYaw(float lastYaw);
 }

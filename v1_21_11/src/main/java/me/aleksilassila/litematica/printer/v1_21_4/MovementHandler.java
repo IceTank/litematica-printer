@@ -1,7 +1,7 @@
 package me.aleksilassila.litematica.printer.v1_21_4;
 
 import me.aleksilassila.litematica.printer.v1_21_4.config.PrinterConfig;
-import me.aleksilassila.litematica.printer.v1_21_4.mixin.MixinAccessorClientPlayerEntity;
+import me.aleksilassila.litematica.printer.v1_21_4.mixin.EntityAccessor;
 import me.aleksilassila.litematica.printer.v1_21_4.mixin.MixinAccessorKeyBinding;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.CraftingScreen;
@@ -71,8 +71,8 @@ public class MovementHandler {
         Vec3d playerPos = new Vec3d(player.getX(), player.getY(), player.getZ());
         mc.getNetworkHandler().sendPacket(new PlayerInputC2SPacket(player.input.playerInput));
         mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.Full(playerPos.x, playerPos.y, playerPos.z, yaw, pitch, player.isOnGround(), player.horizontalCollision));
-        ((MixinAccessorClientPlayerEntity) mc.player).setLastYaw(yaw);
-        ((MixinAccessorClientPlayerEntity) mc.player).setLastPitch(pitch);
+        ((EntityAccessor) mc.player).setPrevYaw(yaw);
+        ((EntityAccessor) mc.player).setPrevPitch(pitch);
     }
 
     public void onDisable(ClientPlayerEntity player) {
