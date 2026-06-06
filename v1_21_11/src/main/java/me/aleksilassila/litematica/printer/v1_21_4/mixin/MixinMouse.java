@@ -33,7 +33,7 @@ public class MixinMouse {
             double k = this.cursorDeltaX * h;
             double l = this.cursorDeltaY * h;
             int m = 1;
-            if (((GameOptionsAccessor) this.client.options).getInvertYMouse().getValue()) {
+            if (this.client.options.getInvertMouseY().getValue()) {
                 m = -1;
             }
             float yaw = (float) (freeLook.getCameraYaw() + k * 0.15F);
