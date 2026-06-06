@@ -15,7 +15,7 @@ public class SchematicConverter {
         LitematicaSchematic schematic = LitematicaSchematicAccessor.invokeConstructor(file, FileType.VANILLA_STRUCTURE);
         schematic.readFromFile();
         String fileName = file.getName().replace(".nbt", "");
-        schematic.writeToFile(out, fileName, true);
+        schematic.writeToFile(out.toPath(), fileName, true);
         LitematicaSchematic newSchem = LitematicaSchematicAccessor.invokeConstructor(new File(out, fileName + ".litematic"), FileType.LITEMATICA_SCHEMATIC);
         newSchem.readFromFile();
         return newSchem;
