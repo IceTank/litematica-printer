@@ -4,8 +4,7 @@
   "package": "me.aleksilassila.litematica.printer.v1_21_4.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
-    "LitematicaSchematicAccessor",
-    "MixinClientConnection"
+    "LitematicaSchematicAccessor"
   ],
   "client": [
     "AxeItemAccessor",
