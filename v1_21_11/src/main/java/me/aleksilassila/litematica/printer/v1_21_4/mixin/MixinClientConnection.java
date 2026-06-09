@@ -50,8 +50,15 @@ public class MixinClientConnection {
                 // Looks like faulty packet is always on syncId = 0
                 if (packet1.getSyncId() == 0 && mc.player != null) {
                     if (packet1.getSlot() >= PlayerScreenHandler.HOTBAR_START || packet1.getSlot() < PlayerScreenHandler.HOTBAR_END) {
-                        // Only cancel updates to block items. Some blocks might not be in the USABLE_SLOTS list but still get used for placing
-                        if (mc.player.playerScreenHandler.getSlot(packet1.getSlot()).getStack().getItem() instanceof BlockItem) {
+                        net.minecraft.item.ItemStack current = mc.player.playerScreenHandler.getSlot(packet1.getSlot()).getStack();
+                        net.minecraft.item.ItemStack incoming = packet1.getStack();
+                        // Only cancel if it's a redundant duplicate (same item AND same count).
+                        // Allow through if the server is correcting the count — blocking those
+                        // causes the client to think it still has blocks it already placed,
+                        // which results in ghost block placements.
+                        if (current.getItem() instanceof BlockItem
+                                && net.minecraft.item.ItemStack.areItemsAndComponentsEqual(current, incoming)
+                                && current.getCount() == incoming.getCount()) {
                             callback.cancel();
                         }
                     }
