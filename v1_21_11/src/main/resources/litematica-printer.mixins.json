@@ -4,7 +4,8 @@
   "package": "me.aleksilassila.litematica.printer.v1_21_4.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
-    "LitematicaSchematicAccessor"
+    "LitematicaSchematicAccessor",
+    "MixinClientConnection"
   ],
   "client": [
     "AxeItemAccessor",
@@ -17,7 +18,8 @@
     "PlayerInventoryAccessor",
     "MixinCamera",
     "MixinClientPlayerEntity",
-    "MixinMouse"
+    "MixinMouse",
+    "PlayerMoveC2SPacketMixin"
   ],
   "injectors": {
     "defaultRequire": 1
