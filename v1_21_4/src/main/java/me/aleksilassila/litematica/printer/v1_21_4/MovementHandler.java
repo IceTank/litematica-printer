@@ -207,6 +207,6 @@ public class MovementHandler {
     }
 
     static boolean isKeyPressed(KeyBinding keyBinding) {
-        return InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), ((MixinAccessorKeyBinding) keyBinding).getBoundKey().getCode());
+        return InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow(), ((MixinAccessorKeyBinding) keyBinding).getBoundKey().getCode());
     }
 }

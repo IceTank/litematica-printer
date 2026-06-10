@@ -11,7 +11,7 @@ public class PresShift extends Action {
         player.input.playerInput = new PlayerInput(player.input.playerInput.forward(),
                 player.input.playerInput.backward(), player.input.playerInput.left(), player.input.playerInput.right(),
                 player.input.playerInput.jump(), true, player.input.playerInput.sprint());
-        player.networkHandler.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
+        player.networkHandler.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.START_SNEAKING));
         return true;
     }
 }
